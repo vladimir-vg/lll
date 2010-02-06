@@ -1,0 +1,7 @@
+* Garbage Collector.
+* Parser.
+* Pretty work with strings allocating.
+* add dump_symbol_table
+
+Small fix:
+* Rewrite to_lowercase more pretty.

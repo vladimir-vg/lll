@@ -14,6 +14,9 @@ struct lll_object *prev_result;
 
 jmp_buf env_buf;
 
+#define C(X, Y) lll_cons(X, Y)
+#define S(A)    lll_get_symbol(A)
+
 int
 main(int argc, char *argv[]) {
         result = NULL;
@@ -27,9 +30,12 @@ main(int argc, char *argv[]) {
         if (setjmp(env_buf)) {
         }
         else {
-                lll_display(lll_cons(NULL, lll_get_symbol("let")));
-
-
+                struct lll_object *obj = C(S("cons"),
+                                           C(S("A"),
+                                             C(S("B"),
+                                               NULL)));
+                lll_display(obj);
+                lll_display(lll_eval(obj));
         }
         /* repl ends */
 

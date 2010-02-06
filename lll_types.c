@@ -44,12 +44,11 @@ lll_csymbol(const char *symbol_string) {
                 lll_fatal_error(9, "symbol_string'' in ``csymbol");
         }
 
-        struct lll_object *symbol = MALLOC_STRUCT(lll_object);
-        symbol->d.symbol = MALLOC_STRUCT(lll_symbol);
-        symbol->type_code = LLL_SYMBOL;
-        //symbol->d.obj = MALLOC_STRUCT(lll_object);
-        symbol->d.symbol->pair.car = NULL;
-        symbol->d.symbol->pair.cdr = NULL;
-        symbol->d.symbol->symbol_string = symbol_string;
-        return symbol;
+        struct lll_object *obj = MALLOC_STRUCT(lll_object);
+        obj->d.symbol = MALLOC_STRUCT(lll_symbol);
+        obj->type_code = LLL_SYMBOL;
+        obj->d.symbol->pair.car = NULL;
+        obj->d.symbol->pair.cdr = NULL;
+        obj->d.symbol->string = symbol_string;
+        return obj;
 }

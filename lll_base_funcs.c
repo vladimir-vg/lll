@@ -96,10 +96,8 @@ lll_displayf_sub(FILE * fd, struct lll_object *obj) {
                 lll_displayf_sub(fd, pair->car);
 
                 /* if we have not just cons-cell, but list then: */
-                while ((p_cdr != NULL) &&
-                       (p_cdr != LLL_T) &&
-                       (p_cdr != LLL_UNDEFINED) &&
-                       ((p_cdr->type_code & LLL_PAIR) != 0)) {
+                while ((p_cdr != NULL) && (p_cdr != LLL_T) && (p_cdr != LLL_UNDEFINED)
+                       && ((p_cdr->type_code & LLL_PAIR) != 0)) {
                         struct lll_pair *p_cdr_pair = p_cdr->d.pair;
                         fprintf(fd, " ");
                         lll_displayf_sub(fd, p_cdr_pair->car);
@@ -118,33 +116,33 @@ lll_displayf_sub(FILE * fd, struct lll_object *obj) {
         /* if not pair */
         else {
                 switch (obj->type_code) {
-                case LLL_SYMBOL:
-                        fprintf(fd, "%s", obj->d.symbol->symbol_string);
-                        break;
+                  case LLL_SYMBOL:
+                          fprintf(fd, "%s", obj->d.symbol->string);
+                          break;
 
-                case LLL_CHAR:
-                        fprintf(fd, "#\\%c", (char) obj->d.c);
-                        break;
+                  case LLL_CHAR:
+                          fprintf(fd, "#\\%c", (char) obj->d.c);
+                          break;
 
-                case LLL_STRING:
-                        fprintf(fd, "\"%s\"", obj->d.string);
-                        break;
+                  case LLL_STRING:
+                          fprintf(fd, "\"%s\"", obj->d.string);
+                          break;
 
-                case LLL_INTEGER32:
-                        fprintf(fd, "%d", obj->d.integer32);
-                        break;
+                  case LLL_INTEGER32:
+                          fprintf(fd, "%d", obj->d.integer32);
+                          break;
 
-                case LLL_LAMBDA:       /* TODO: printing name. */
-                        fprintf(fd, "<lambda>");
-                        break;
+                  case LLL_LAMBDA:     /* TODO: printing name. */
+                          fprintf(fd, "<lambda>");
+                          break;
 
-                case LLL_BUILTIN_FUNCTION:
-                        fprintf(fd, "<builtin function>");
-                        break;
+                  case LLL_BUILTIN_FUNCTION:
+                          fprintf(fd, "<builtin function>");
+                          break;
 
-                default:
-                        printf("%x\n", obj->type_code);
-                        lll_fatal_error(6, "display");
+                  default:
+                          printf("%x\n", obj->type_code);
+                          lll_fatal_error(6, "display");
                 }
         }
 }
@@ -165,15 +163,15 @@ lll_call_bf(struct lll_object *symbol, struct lll_pair *arg_list) {
 
 
         if ((func->type_code & LLL_BUILTIN_FUNCTION) == 0) {
-                lll_fatal_error(8, symbol->d.symbol->symbol_string);
+                lll_fatal_error(8, symbol->d.symbol->string);
         }
 
         uint32_t l = lll_list_length(arg_list);
         if (l > func->d.bf->args_count) {
-                lll_error(4, symbol->d.symbol->symbol_string);
+                lll_error(4, symbol->d.symbol->string);
         }
         else if (l < func->d.bf->args_count) {
-                lll_error(3, symbol->d.symbol->symbol_string);
+                lll_error(3, symbol->d.symbol->string);
         }
 
         return (*func->d.bf->function) (arg_list);
@@ -200,7 +198,7 @@ lll_bf_cons(struct lll_pair *arg_list) {
 struct lll_object *
 lll_bf_length(struct lll_pair *arg_list) {
         if ((arg_list->car->type_code & LLL_PAIR) == 0) {
-                lll_error(8, "length");
+                lll_error(9, "length");
         }
 
         return lll_cinteger32(lll_list_length(arg_list->car->d.pair));
@@ -209,7 +207,7 @@ lll_bf_length(struct lll_pair *arg_list) {
 struct lll_object *
 lll_bf_car(struct lll_pair *arg_list) {
         if ((arg_list->car->type_code & LLL_PAIR) == 0) {
-                lll_error(8, "car");
+                lll_error(9, "car");
         }
 
         return arg_list->car->d.pair->car;
@@ -218,7 +216,7 @@ lll_bf_car(struct lll_pair *arg_list) {
 struct lll_object *
 lll_bf_cdr(struct lll_pair *arg_list) {
         if ((arg_list->car->type_code & LLL_PAIR) == 0) {
-
+                lll_error(9, "cdr");
         }
 
         return arg_list->car->d.pair->cdr;
@@ -233,8 +231,7 @@ lll_bind_base_constants() {
 }
 
 void
-lll_bind_bf(lll_lisp_func f,
-            const char *f_name, uint32_t arg_count, bool last_as_rest) {
+lll_bind_bf(lll_lisp_func f, const char *f_name, uint32_t arg_count, bool last_as_rest) {
         struct lll_object *obj = MALLOC_STRUCT(lll_object);
         obj->type_code = LLL_BUILTIN_FUNCTION;
         obj->d.bf = MALLOC_STRUCT(lll_builtin_function);

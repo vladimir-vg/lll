@@ -55,11 +55,10 @@ lll_correct_symbol_string_p(const char *symbol_string) {
                 lll_error(1, (symbol_string));
         }
 
-        if (!isdigit(symbol_string[0]) &&
-            !isspace(symbol_string[0]) && isallowd(symbol_string[0])) {
+        if (!isdigit(symbol_string[0]) && !isspace(symbol_string[0])
+            && isallowd(symbol_string[0])) {
                 for (int i = 1; i < length; ++i) {
-                        if (!isspace(symbol_string[i]) &&
-                            isallowd(symbol_string[i])) {
+                        if (!isspace(symbol_string[i]) && isallowd(symbol_string[i])) {
                                 continue;       /* all is ok. go forward. */
                         }
                         else {
@@ -85,8 +84,8 @@ lll_init_symbol_table() {
 
 struct lll_object *
 lll_get_binded_object(const char *symbol_string) {
-        struct lll_object *symbol = lll_get_symbol(symbol_string);
-        return symbol->d.symbol->pair.car;
+        struct lll_object *obj = lll_get_symbol(symbol_string);
+        return obj->d.symbol->pair.car;
 }
 
 
@@ -104,35 +103,30 @@ lll_get_symbol(const char *symbol_string) {
         bool allocated = false;
         char *lowercase_version = lll_to_lowercase(symbol_string, &allocated);
 
-        struct lll_symbol_entry *entry =
-                &hash_table[hash_func(lowercase_version)];
+        struct lll_symbol_entry *entry = &hash_table[hash_func(lowercase_version)];
 
         while (true) {
                 /* haven't binded symbols. */
                 if (entry == NULL) {
-                        struct lll_object *symbol =
-                                lll_csymbol(lowercase_version);
-                        symbol->d.symbol->pair.car = LLL_UNDEFINED;
+                        struct lll_object *obj = lll_csymbol(lowercase_version);
+                        obj->d.symbol->pair.car = LLL_UNDEFINED;
 
                         entry = MALLOC_STRUCT(lll_symbol_entry);
-                        entry->symbol = symbol;
+                        entry->symbol = obj;
                         entry->another_string = NULL;
 
-                        return symbol;
+                        return obj;
                 }
 
                 if (entry->symbol == NULL) {
-                        struct lll_object *symbol =
-                                lll_csymbol(lowercase_version);
-                        symbol->d.symbol->pair.car = LLL_UNDEFINED;
-                        entry->symbol = symbol;
+                        struct lll_object *obj = lll_csymbol(lowercase_version);
+                        obj->d.symbol->pair.car = LLL_UNDEFINED;
+                        entry->symbol = obj;
 
-                        return symbol;
+                        return obj;
                 }
 
-                if (strcmp
-                    (entry->symbol->d.symbol->symbol_string,
-                     lowercase_version) == 0) {
+                if (strcmp(entry->symbol->d.symbol->string, lowercase_version) == 0) {
                         if (allocated) {
                                 free((void *) lowercase_version);
                         }
@@ -156,24 +150,22 @@ lll_bind_symbol(const char *symbol_string, struct lll_object *obj) {
         bool allocated = false;
         char *lowercase_version = lll_to_lowercase(symbol_string, &allocated);
 
-        struct lll_symbol_entry *symbol_entry =
-                &hash_table[hash_func(lowercase_version)];
+        struct lll_symbol_entry *entry = &hash_table[hash_func(lowercase_version)];
         /* Works endless if in some entry
            ahother_string will be not initialized with NULL */
         while (true) {
-                if (symbol_entry == NULL) {
-                        symbol_entry = MALLOC_STRUCT(lll_symbol_entry);
-                        symbol_entry->symbol = NULL;
-                        symbol_entry->another_string = NULL;
+                if (entry == NULL) {
+                        entry = MALLOC_STRUCT(lll_symbol_entry);
+                        entry->symbol = NULL;
+                        entry->another_string = NULL;
                 }
 
-                if (symbol_entry->symbol == NULL) {
+                if (entry->symbol == NULL) {
                         /* If symbol undefined, just bind it. */
-                        struct lll_object *symbol =
-                                lll_csymbol(lowercase_version);
-                        symbol->d.symbol->pair.car = obj;
-                        symbol->d.symbol->pair.cdr = NULL;
-                        symbol_entry->symbol = symbol;
+                        struct lll_object *sobj = lll_csymbol(lowercase_version);
+                        sobj->d.symbol->pair.car = obj;
+                        sobj->d.symbol->pair.cdr = NULL;
+                        entry->symbol = sobj;
                         return;
                 }
 
@@ -181,17 +173,13 @@ lll_bind_symbol(const char *symbol_string, struct lll_object *obj) {
                    push on top obj value.
                    Address of top pair don't changed.
                  */
-                if (strcmp
-                    (symbol_entry->symbol->d.symbol->symbol_string,
-                     lowercase_version) == 0) {
+                if (strcmp(entry->symbol->d.symbol->string, lowercase_version) == 0) {
                         if (allocated) {
                                 free((void *) lowercase_version);
                         }
 
-                        struct lll_pair *top_pair =
-                                &symbol_entry->symbol->d.symbol->pair;
-                        struct lll_object *new_pair =
-                                MALLOC_STRUCT(lll_object);
+                        struct lll_pair *top_pair = &entry->symbol->d.symbol->pair;
+                        struct lll_object *new_pair = MALLOC_STRUCT(lll_object);
                         new_pair->type_code = LLL_PAIR;
 
                         new_pair->d.pair->car = top_pair->car;
@@ -203,6 +191,6 @@ lll_bind_symbol(const char *symbol_string, struct lll_object *obj) {
                 }
 
                 /* if strings different we must search another. */
-                symbol_entry = symbol_entry->another_string;
+                entry = entry->another_string;
         }
 }

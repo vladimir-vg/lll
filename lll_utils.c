@@ -39,7 +39,13 @@ const char *error_messages[] = {
         "Function ``%s'' got non-list argument.\n",
 
         /* 010 */
-        "``%s'' reference to NULL.\n"
+        "``%s'' reference to NULL.\n",
+
+        /* 011 */
+        "%s not implemented yet.\n",
+
+        /* 012 */
+        "Only builtin-functions and lambda-functions can evaluated.\n"
 };
 
 void

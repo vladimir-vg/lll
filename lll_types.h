@@ -53,7 +53,7 @@ struct lll_pair {
 
 
 struct lll_symbol {
-        const char *symbol_string;
+        const char *string;
         /* car -- last binded values.
            cdr -- previous.
            if car == NULL, then this symbol not binded.

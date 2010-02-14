@@ -34,7 +34,7 @@ hash_func(const char *data) {
 
 bool
 isallowd(char c) {
-        return (strchr(LLL_NOT_ALLOWED_S, c) == NULL);
+        return ((strchr(LLL_ALLOWED_S, c) != NULL) || isdigit(c) || isalnum(c));
 }
 
 
@@ -48,15 +48,14 @@ bool
 lll_correct_symbol_string_p(const char *symbol_string) {
         int length = strlen(symbol_string);
         if (length > LLL_MAX_SYMBOL_LENGTH) {
-                lll_error(0, (symbol_string));
+                lll_error(0, symbol_string, __FILE__, __LINE__);
         }
 
         if (length == 0) {
-                lll_error(1, (symbol_string));
+                lll_error(1, symbol_string, __FILE__, __LINE__);
         }
 
-        if (!isdigit(symbol_string[0]) && !isspace(symbol_string[0])
-            && isallowd(symbol_string[0])) {
+        if ((isdigit(symbol_string[0]) == 0) && (isallowd(symbol_string[0]) != 0)) {
                 for (int i = 1; i < length; ++i) {
                         if (!isspace(symbol_string[i]) && isallowd(symbol_string[i])) {
                                 continue;       /* all is ok. go forward. */
@@ -92,7 +91,7 @@ lll_get_binded_object(const char *symbol_string) {
 struct lll_object *
 lll_get_symbol(const char *symbol_string) {
         if (!lll_correct_symbol_string_p(symbol_string)) {
-                lll_error(2, symbol_string);
+                lll_error(2, symbol_string, __FILE__, __LINE__);
                 return NULL;
         }
 
@@ -140,7 +139,7 @@ lll_get_symbol(const char *symbol_string) {
 void
 lll_bind_symbol(const char *symbol_string, struct lll_object *obj) {
         if (!lll_correct_symbol_string_p(symbol_string)) {
-                lll_error(2, symbol_string);
+                lll_error(2, symbol_string, __FILE__, __LINE__);
         }
 
         /* here allocates mem for string, if need.

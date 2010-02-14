@@ -7,8 +7,8 @@
 
 # define LLL_MAX_SYMBOL_LENGTH 60
 
-/* static const char LLL_ALLOWED_S[] = "!$%^&?*-+<>=/~"; */
-# define LLL_NOT_ALLOWED_S ",.:#'`@()[]{}\\"
+# define LLL_ALLOWED_S         "!$%^&?*-+<>=/~"
+# define LLL_NOT_ALLOWED_S     ",.:#'`@()[]{}\\"
 
 
 struct lll_symbol_entry {
@@ -18,7 +18,7 @@ struct lll_symbol_entry {
         struct lll_symbol_entry *another_string;
 };
 
-
+bool isallowd(char);
 void lll_init_symbol_table();
 struct lll_object *lll_get_binded_object(const char *);
 struct lll_object *lll_get_symbol(const char *);

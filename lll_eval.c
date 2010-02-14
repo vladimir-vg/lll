@@ -18,11 +18,11 @@ lll_eval(struct lll_object *obj) {
                         return lll_call_bf(obj->d.pair->car, obj->d.pair->cdr->d.pair);
                 }
                 else if ((tp & LLL_LAMBDA) != 0) {
-                        lll_error(11, "Evaluating lambda-forms");
+                        lll_error(11, "Evaluating lambda-forms", __FILE__, __LINE__);
                         return NULL;
                 }
                 else {
-                        lll_error(12, NULL);
+                        lll_error(12, NULL, __FILE__, __LINE__);
                         return NULL;
                 }
         }
@@ -42,7 +42,7 @@ lll_eval(struct lll_object *obj) {
                           break;
 
                   default:
-                          lll_fatal_error(6, "eval");
+                          lll_fatal_error(6, "eval", __FILE__, __LINE__);
                           return NULL;
                 }
         }

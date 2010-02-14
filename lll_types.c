@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "lll_utils.h"
 #include "lll_types.h"
@@ -41,7 +42,7 @@ lll_cinteger32(int32_t i) {
 struct lll_object *
 lll_csymbol(const char *symbol_string) {
         if (symbol_string == NULL) {
-                lll_fatal_error(9, "symbol_string'' in ``csymbol");
+                lll_fatal_error(9, "symbol_string'' in ``csymbol", __FILE__, __LINE__);
         }
 
         struct lll_object *obj = MALLOC_STRUCT(lll_object);

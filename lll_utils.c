@@ -24,7 +24,7 @@ const char *error_messages[] = {
         "Function ``%s'' get too many arguments.\n",
 
         /* 005 */
-        "Inner ``%s'' function get a non-null terminated list.\n",
+        "Inner ``%s'' function get a non-nil terminated list.\n",
 
         /* 006 */
         "Inner ``%s'' function get object with unknown type_code.\n",
@@ -45,12 +45,18 @@ const char *error_messages[] = {
         "%s not implemented yet.\n",
 
         /* 012 */
-        "Only builtin-functions and lambda-functions can evaluated.\n"
+        "Only builtin-functions and lambda-functions can evaluated.\n",
+
+        /* 013 */
+        "Function ``%s'' get an EOF.\n",
+
+        /* 014 */
+        "Error at reading: %s.\n"
 };
 
 void
-lll_fatal_error(uint32_t error_code, const char *message) {
-        fprintf(stderr, "[lll]Fatal: ");
+lll_fatal_error(uint32_t error_code, const char *message, const char *filename, const uint32_t line) {
+        fprintf(stderr, "[lll/%s:%d]Fatal: ", filename, line);
         if (message == NULL) {
                 fprintf(stderr, error_messages[error_code]);
         }
@@ -61,8 +67,8 @@ lll_fatal_error(uint32_t error_code, const char *message) {
 }
 
 void
-lll_error(uint32_t error_code, const char *message) {
-        fprintf(stderr, "[lll]: ");
+lll_error(uint32_t error_code, const char *message, const char *filename, const uint32_t line) {
+        fprintf(stderr, "[lll/%s:%d]: ", filename, line);
         if (message == NULL) {
                 fprintf(stderr, error_messages[error_code]);
         }
@@ -70,11 +76,6 @@ lll_error(uint32_t error_code, const char *message) {
                 fprintf(stderr, error_messages[error_code], message);
         }
         longjmp(env_buf, 1);
-}
-
-void
-lll_warning(const char *message) {
-        fprintf(stderr, "[lll]Warning: %s\n", message);
 }
 
 /* if conversion not need -- just return arg.

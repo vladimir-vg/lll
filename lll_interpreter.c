@@ -7,6 +7,7 @@
 #include "lll_symtable.h"
 #include "lll_base_funcs.h"
 #include "lll_eval.h"
+#include "lll_read.h"
 #include "lll_utils.h"
 
 struct lll_object *result;
@@ -18,7 +19,7 @@ jmp_buf env_buf;
 #define S(A)    lll_get_symbol(A)
 
 int
-main(int argc, char *argv[]) {
+main() {
         result = NULL;
         prev_result = NULL;
 
@@ -27,15 +28,10 @@ main(int argc, char *argv[]) {
         lll_bind_base_functions();
 
         /* repl begin */
-        if (setjmp(env_buf)) {
-        }
-        else {
-                struct lll_object *obj = C(S("cons"),
-                                           C(S("A"),
-                                             C(S("B"),
-                                               NULL)));
-                lll_display(obj);
-                lll_display(lll_eval(obj));
+        if (!setjmp(env_buf)) {
+                //                FILE *fd = fopen("input.txt", "r");
+                lll_display(lll_read(stdin));
+                //fclose(fd);
         }
         /* repl ends */
 

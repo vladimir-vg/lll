@@ -74,6 +74,11 @@ struct lll_builtin_function {
 struct lll_object *lll_cchar(char);
 struct lll_object *lll_cstring(const char *);
 struct lll_object *lll_cinteger32(int32_t);
+
+/* that function only constructs symbol object.
+   Constructed object haven't any binding.
+   use lll_get_symbol instead.
+ */
 struct lll_object *lll_csymbol(const char *);
 
 #endif

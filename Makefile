@@ -1,11 +1,21 @@
 # Makefile for lll
 
-COMPILE_FLAGS= -Wall -std=c99 -g
-OBJS= lll_interpreter.o lll_types.o lll_symtable.o lll_utils.o \
-	lll_base_funcs.o lll_eval.o
+BINARY=llli
+DEL_CMD=rm
+COMPILE_FLAGS= -Wall -Wextra -pedantic -std=c99 -g -O0
+OBJS=	lll_interpreter.o \
+	lll_types.o       \
+	lll_symtable.o    \
+	lll_utils.o       \
+	lll_base_funcs.o  \
+	lll_eval.o        \
+	lll_read.o
 
 lll_interpreter: $(OBJS)
-	gcc $(OBJS) -o llli
+	gcc $(OBJS) -o $(BINARY)
+
+lll_read.o: lll_read.c lll_read.h
+	gcc $(COMPILE_FLAGS) -c lll_read.c -o lll_read.o
 
 lll_eval.o: lll_eval.c lll_eval.h
 	gcc $(COMPILE_FLAGS) -c lll_eval.c -o lll_eval.o 
@@ -26,5 +36,5 @@ lll_utils.o: lll_utils.c lll_utils.h
 	gcc $(COMPILE_FLAGS) -c lll_utils.c -o lll_utils.o
 
 clean:
-	rm *.o
-	rm llli
+	$(DEL_CMD) *.o
+	$(DEL_CMD) $(BINARY)

@@ -6,6 +6,42 @@
 #include "lll_symtable.h"
 
 struct lll_object *
+lll_quote(struct lll_object *obj) {
+        struct lll_object *result = MALLOC_STRUCT(lll_object);
+        result->type_code = LLL_QUOTE;
+        result->d.obj = obj;
+
+        return result;
+}
+
+struct lll_object *
+lll_quasiquote(struct lll_object *obj) {
+        struct lll_object *result = MALLOC_STRUCT(lll_object);
+        result->type_code = LLL_QUASIQUOTE;
+        result->d.obj = obj;
+
+        return result;
+}
+
+struct lll_object *
+lll_unquote(struct lll_object *obj) {
+        struct lll_object *result = MALLOC_STRUCT(lll_object);
+        result->type_code = LLL_UNQUOTE;
+        result->d.obj = obj;
+
+        return result;
+}
+
+struct lll_object *
+lll_unquote_splicing(struct lll_object *obj) {
+        struct lll_object *result = MALLOC_STRUCT(lll_object);
+        result->type_code = LLL_UNQUOTE_SPLICING;
+        result->d.obj = obj;
+
+        return result;
+}
+
+struct lll_object *
 lll_cchar(char c) {
         struct lll_object *result = MALLOC_STRUCT(lll_object);
 
@@ -38,7 +74,9 @@ lll_cinteger32(int32_t i) {
 }
 
 
-/* don't use that function. It just construct symbol object without any checking. */
+/* don't use that function. It just construct symbol object without any checking.
+   Use lll_get_symbol in lll_symtable.h instead.
+ */
 struct lll_object *
 lll_csymbol(const char *symbol_string) {
         if (symbol_string == NULL) {

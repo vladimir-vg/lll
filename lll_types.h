@@ -7,9 +7,6 @@
 /* Type code. Representes what kind of type we have. [_][_|_|_] */
 /* Some characteristic. One byte. */
 # define LLL_CONST                       0x01000000
-# define LLL_QUOTED                      0x02000000     /* '(some list) */
-# define LLL_QUASIQUOTED                 0x04000000     /* `(some list) */
-# define LLL_UNQUOTED                    0x08000000     /* ,(some list) */
 
 /* Type. Takes three bytes. */
 # define LLL_PAIR                        0x00000001
@@ -19,6 +16,10 @@
 # define LLL_INTEGER32                   0x00000010     /* always signed */
 # define LLL_LAMBDA                      0x00000020
 # define LLL_BUILTIN_FUNCTION            0x00000040
+# define LLL_QUOTE                       0x00000080     /* ' */
+# define LLL_QUASIQUOTE                  0x00000100     /* ` */
+# define LLL_UNQUOTE                     0x00000200     /* , */
+# define LLL_UNQUOTE_SPLICING            0x00000400     /* ,@ */
 
 # define LLL_EXTERNAL_TYPE               0x00800000
 
@@ -69,6 +70,11 @@ struct lll_builtin_function {
         uint32_t args_count;
         bool last_as_rest;
 };
+
+struct lll_object *lll_quote(struct lll_object *);
+struct lll_object *lll_quasiquote(struct lll_object *);
+struct lll_object *lll_unquote(struct lll_object *);
+struct lll_object *lll_unquote_splicing(struct lll_object *);
 
 /* Construction funcs. Have lll_c<type> view. */
 struct lll_object *lll_cchar(char);

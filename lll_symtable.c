@@ -11,6 +11,8 @@
 
 static struct lll_symbol_entry hash_table[UINT16_MAX + 1];      /* from 0..UINT16_MAX */
 
+uint16_t hash_func(const char *data);
+
 /* That is CRC-16 CCITT. I just copy-paste it from wikipedia %). */
 uint16_t
 hash_func(const char *data) {
@@ -73,7 +75,7 @@ lll_correct_symbol_string_p(const char *symbol_string) {
 
 
 void
-lll_init_symbol_table() {
+lll_init_symbol_table(void) {
         for (uint32_t i = 0; i <= UINT16_MAX; ++i) {
                 hash_table[i].symbol = NULL;
                 hash_table[i].another_string = NULL;
@@ -101,6 +103,10 @@ lll_get_symbol(const char *symbol_string) {
          */
         bool allocated = false;
         char *lowercase_version = lll_to_lowercase(symbol_string, &allocated);
+
+        if (strcmp(lowercase_version, "nil") == 0) {
+                return NULL;
+        }
 
         struct lll_symbol_entry *entry = &hash_table[hash_func(lowercase_version)];
 

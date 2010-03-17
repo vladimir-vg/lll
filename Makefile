@@ -2,17 +2,25 @@
 
 BINARY=llli
 DEL_CMD=rm
-COMPILE_FLAGS= -Wall -Wextra -pedantic -std=c99 -g -O0
-OBJS=	lll_interpreter.o \
-	lll_types.o       \
-	lll_symtable.o    \
-	lll_utils.o       \
-	lll_base_funcs.o  \
-	lll_eval.o        \
+COMPILE_FLAGS= -Wall -Wextra -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_GLIBCXX_DEBUG -std=c99 -ggdb -O0
+OBJS=	lll_interpreter.o   \
+	lll_types.o         \
+	lll_symtable.o      \
+	lll_utils.o         \
+	lll_base_funcs.o    \
+	lll_eval.o          \
+	lll_print.o         \
+	lll_special_forms.o \
 	lll_read.o
 
 lll_interpreter: $(OBJS)
 	gcc $(OBJS) -o $(BINARY)
+
+lll_special_forms.o: lll_special_forms.h lll_special_forms.c
+	gcc $(COMPILE_FLAGS) -c lll_special_forms.c -o lll_special_forms.o
+
+lll_print.o: lll_print.h lll_print.c
+	gcc $(COMPILE_FLAGS) -c lll_print.c -o lll_print.o
 
 lll_read.o: lll_read.c lll_read.h
 	gcc $(COMPILE_FLAGS) -c lll_read.c -o lll_read.o

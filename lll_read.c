@@ -17,6 +17,17 @@ uint32_t length;
 /* used in recursive s-exp parsing procedure */
 char *strrec;
 
+struct lll_object *parse_atom(char *, char *);
+struct lll_object *parse_sexp(char *, char *);
+void unparent(char **, int);
+int sexp_length(char *);
+void pass_whitespace(char **);
+
+bool correct_integer_p(char *);
+bool correct_char_p(char *);
+bool correct_string_p(char *);
+bool correct_symbol_p(char *);
+
 /*
   first -- read to string one expression.
   read while not found some whitespace,
@@ -24,12 +35,10 @@ char *strrec;
  */
 struct lll_object *
 lll_read(FILE * fd) {
-
-        extern struct lll_object *parse_atom(char *);
-        extern struct lll_object *parse_sexp();
-
         /* for parentheses counting. */
         uint32_t deep = 0;
+        char preffix[255];
+        int plength = 0;
         char c;
         length = 0;
         bool is_sexp = false;
@@ -40,15 +49,33 @@ lll_read(FILE * fd) {
         }
         int last_space = 0;
 
+        while (c == '\'' || c == '`' || c == ',' || c == '@') {
+                preffix[plength++] = c;
+                c = getc(fd);
+        }
+        preffix[plength] = '\0';
+
         /* then we just read all chars before whitespace or EOF */
         if (c != '(') {
-                do {
+                if (c == '\"') {
+                        do {
+                                buffer[length++] = c;
+                                if (length == BUFFER_SIZE - 1) {
+                                        lll_error(14, "too big input", __FILE__, __LINE__);
+                                }
+                                c = getc(fd);
+                        } while (c != '\"');
                         buffer[length++] = c;
-                        if (length == BUFFER_SIZE - 1) {
-                                lll_error(14, "too big input", __FILE__, __LINE__);
-                        }
-                        c = getc(fd);
-                } while ((feof(fd) != 0) || !(last_space = isspace(c)));
+                }
+                else {
+                        do {
+                                buffer[length++] = c;
+                                if (length == BUFFER_SIZE - 1) {
+                                        lll_error(14, "too big input", __FILE__, __LINE__);
+                                }
+                                c = getc(fd);
+                        } while ((feof(fd) != 0) || !(last_space = isspace(c)));
+                }
         }
         else {
                 is_sexp = true;
@@ -76,15 +103,41 @@ lll_read(FILE * fd) {
 
         if (is_sexp) {
                 strrec = buffer;
-                return parse_sexp();
+                unparent(&strrec, strlen(strrec));
+                return parse_sexp(strrec, preffix);
         }
         else {
-                return parse_atom(buffer);
+                return parse_atom(buffer, preffix);
         }
 }
 
 struct lll_object *
-parse_atom(char *str) {
+parse_atom(char *str, char *preffix) {
+        /* preffix contain ,'`,@ stuff */
+
+        if (preffix[0] != '\0') {
+                switch (preffix[0]) {
+                  case '\'':
+                          return lll_quote(parse_atom(str, &preffix[1]));
+                          break;
+
+                  case '`':
+                          return lll_quasiquote(parse_atom(str, &preffix[1]));
+                          break;
+
+                  case ',':
+                          if (preffix[1] == '@') {
+                                  return lll_unquote_splicing(parse_atom(str, &preffix[2]));
+                          }
+                          return lll_unquote(parse_atom(str, &preffix[1]));
+                          break;
+
+                  default:
+                          lll_error(14, "Unknown preffix", __FILE__, __LINE__);
+                          return NULL;
+                }
+        }
+
         extern bool correct_integer_p(char *);
         extern bool correct_char_p(char *);
         extern bool correct_string_p(char *);
@@ -115,93 +168,209 @@ parse_atom(char *str) {
                 return lll_get_symbol(str);
         }
         else {
-                // to del
-                printf("parse:'%s'\n", str);
+                printf("[error]: '%s'\n", str); // to del
                 lll_error(14, "Couldn't parse string", __FILE__, __LINE__);
         }
 
         return NULL;
 }
 
-struct lll_object *
-parse_sexp() {
-        printf("strrec:'%s'\n", strrec);
+
+/* makes " ( s y (z g) ((z) y) ) " to "s y (z g) ((z) y)" */
+void
+unparent(char **str, int length) {
         extern void pass_whitespace(char **);
-        char *nstr;
+        int i = length - 1;
 
-        pass_whitespace(&strrec);
-
-        if (strrec[0] != '(') {
-                lll_error(14, "First char was not '(' at parsing s-exp", __FILE__, __LINE__);
+        while (true) {
+                if ((*str)[i] == ')') {
+                        (*str)[i] = '\0';
+                        i--;
+                        break;
+                }
+                (*str)[i] = '\0';
+                i--;
         }
 
-        strrec++;
-        pass_whitespace(&strrec);
-
-        /* we have ()  */
-        if (strrec[0] == ')') {
-                strrec++;
-                return lll_get_symbol("nil");
+        while (isspace((*str)[i])) {
+                (*str)[i] = '\0';
+                i--;
         }
 
+        /* pass '(' */
+        (*str)++;
+
+        pass_whitespace(str);
+}
+
+
+int
+sexp_length(char *str) {
+        int result = 0;
+        if (str[0] != '(') {
+                lll_fatal_error(14,
+                                "expected '(' as first char in sexp_length", __FILE__, __LINE__);
+        }
+        result++;
+        int deep = 1;
+        while (deep != 0) {
+                if (str[result] == '(') {
+                        deep++;
+                }
+                else if (str[result] == ')') {
+                        deep--;
+                }
+                result++;
+        }
+        return result;
+}
+
+
+/* parse s-expression without parentheses */
+struct lll_object *
+parse_sexp(char *str, char *pref) {
+        struct lll_object *result = NULL;
+
+        if (pref[0] != '\0') {
+                switch (pref[0]) {
+                  case '\'':
+                          return lll_quote(parse_sexp(str, &pref[1]));
+                          break;
+
+                  case '`':
+                          return lll_quasiquote(parse_sexp(str, &pref[1]));
+                          break;
+
+                  case ',':
+                          if (pref[1] == '@') {
+                                  return lll_unquote_splicing(parse_sexp(str, &pref[2]));
+                          }
+                          return lll_unquote(parse_sexp(str, &pref[1]));
+                          break;
+
+                  default:
+                          lll_error(14, "Unknown preffix", __FILE__, __LINE__);
+                          return NULL;
+                }
+        }
+
+        if (str[0] == '\0') {
+                if (pref[0] != '\0') {
+                        lll_error(14, "found whitespace after preffix", __FILE__, __LINE__);
+                }
+                return NULL;
+        }
+
+        pass_whitespace(&str);
+        int n = 0;
+        char *tmpstr = NULL;
+        bool done = false;
+        bool dotted = false;
+        char preffix[255];
+        int plength = 0;
+        preffix[0] = '\0';
         struct lll_object *tmp = NULL;
-        struct lll_object *result = MALLOC_STRUCT(lll_object);
-        result->d.pair = MALLOC_STRUCT(lll_pair);
-        result->type_code = LLL_PAIR;
-        result->d.pair->car = NULL;
-        result->d.pair->cdr = NULL;
+        while (str[0] != '\0') {
+                if (str[0] == '\'' || str[0] == '`' || str[0] == ',' || str[0] == '@') {
+                        preffix[plength++] = str[0];
+                        str = &str[1];
+                        continue;
+                }
+                else {
+                        preffix[plength] = '\0';
+                }
 
-        while (strrec[0] != '\0') {
-                int n = 0;
-                while (strrec[0] != '\0') {
-                        if (isspace(strrec[n])) {
-                                strrec[n] = '\0';
-                                nstr = &strrec[n + 1];
-                                tmp = parse_atom(strrec);
-                                lll_append_to_list(result, tmp);
-                                strrec = nstr;
-                                pass_whitespace(&strrec);
+                if (plength != 0 && isspace(str[0])) {
+                        lll_error(14, "found whitespace after preffix", __FILE__, __LINE__);
+                }
+
+                if (isspace(str[n]) || str[n] == '\"' || str[n] == '\0') {
+                        if (str[n] == '\0') {
+                                done = true;
+                        }
+                        str[n] = '\0';
+
+                        /* dot (* . ?) case */
+                        if (str[0] == '.' && str[1] == '\0') {
+                                dotted = true;
+                                str = &str[n + 1];
                                 n = 0;
+                                pass_whitespace(&str);
+                                continue;
                         }
-                        else if (strrec[n] == '(') {
-                                strrec[n] = '\0';
-                                nstr = &strrec[n];
-                                if (strrec[0] != '\0') {
-                                        tmp = parse_atom(strrec);
-                                        lll_append_to_list(result, tmp);
+
+                        tmp = parse_atom(str, preffix);
+                        plength = 0;
+
+                        if (dotted) {
+                                lll_append_as_last_cdr(&result, tmp);
+                                str = &str[n + 1];
+                                pass_whitespace(&str);
+                                if (str[0] != '\0') {
+                                        printf("0:'%s'\n", str);
+                                        lll_error(14,
+                                                  "only one expression can be placed after '.'",
+                                                  __FILE__, __LINE__);
                                 }
-                                else {
-                                        break;
-                                }
-                                strrec = nstr;
-                                strrec[0] = '(';
-                                tmp = parse_sexp();
-                                lll_append_to_list(result, tmp);
-                                pass_whitespace(&strrec);
-                                break;
-                        }
-                        else if (strrec[n] == ')') {
-                                if (strrec[0] != '\0') {
-                                        strrec[n] = '\0';
-                                        nstr = &strrec[n + 1];
-                                        tmp = parse_atom(strrec);
-                                        lll_append_to_list(result, tmp);
-                                }
-                                else {
-                                        break;
-                                }
-                                strrec = nstr;
-                                pass_whitespace(&strrec);
                                 return result;
                         }
                         else {
-                                n++;
+                                lll_append_to_list(&result, tmp);
                         }
+                        if (done) {
+                                break;
+                        }
+                        str = &str[n + 1];
+                        pass_whitespace(&str);
+                        n = 0;
                 }
+                else if (str[n] == '(') {
+
+                        /* if was some atom before '(' */
+                        if (n != 0) {
+                                str[n] = '\0';
+
+                                tmp = parse_atom(str, preffix);
+                                plength = 0;
+                                lll_append_to_list(&result, tmp);
+                                str[n] = '(';
+                        }
+                        str = &str[n];
+                        int length = sexp_length(str);
+                        tmpstr = &str[length];
+                        unparent(&str, length);
+                        tmp = parse_sexp(str, preffix);
+                        plength = 0;
+                        if (dotted) {
+                                lll_append_as_last_cdr(&result, tmp);
+                                pass_whitespace(&tmpstr);
+                                if (tmpstr[0] != '\0') {
+                                        lll_error(14,
+                                                  "only one expression can be placed after '.'",
+                                                  __FILE__, __LINE__);
+                                        return NULL;
+                                }
+                                return result;
+                        }
+                        else {
+                                lll_append_to_list(&result, tmp);
+                        }
+                        str = tmpstr;
+                        pass_whitespace(&str);
+                        n = 0;
+                }
+                else {
+                        n++;
+                }
+        }
+
+        if (dotted) {
+                lll_error(14, "expected expr after '.'", __FILE__, __LINE__);
         }
 
         return result;
 }
+
 
 void
 pass_whitespace(char **str) {

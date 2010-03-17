@@ -19,9 +19,10 @@ struct lll_symbol_entry {
 };
 
 bool isallowd(char);
-void lll_init_symbol_table();
+void lll_init_symbol_table(void);
 struct lll_object *lll_get_binded_object(const char *);
 struct lll_object *lll_get_symbol(const char *);
 void lll_bind_symbol(const char *, struct lll_object *);
+bool lll_correct_symbol_string_p(const char *);
 
 #endif

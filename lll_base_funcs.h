@@ -12,11 +12,12 @@ struct lll_object *lll_cons(struct lll_object *, struct lll_object *arg2);
 struct lll_object *lll_car(struct lll_pair *);
 struct lll_object *lll_cdr(struct lll_pair *);
 
-void lll_displayf(FILE *, struct lll_object *);
-void lll_display(struct lll_object *);
-void lll_append_to_list(struct lll_object *, struct lll_object *);
+void lll_append_to_list(struct lll_object **, struct lll_object *);
+void lll_append_as_last_cdr(struct lll_object **, struct lll_object *);
 struct lll_object *lll_call_bf(struct lll_object *, struct lll_pair *arg_list);
-void lll_bind_base_constants();
-void lll_bind_base_functions();
+void lll_bind_base_constants(void);
+void lll_bind_base_functions(void);
+
+uint32_t lll_list_length(struct lll_pair *list);
 
 #endif

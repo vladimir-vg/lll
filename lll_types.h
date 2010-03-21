@@ -16,10 +16,11 @@
 # define LLL_INTEGER32                   0x00000010     /* always signed */
 # define LLL_LAMBDA                      0x00000020
 # define LLL_BUILTIN_FUNCTION            0x00000040
-# define LLL_QUOTE                       0x00000080     /* ' */
-# define LLL_QUASIQUOTE                  0x00000100     /* ` */
-# define LLL_UNQUOTE                     0x00000200     /* , */
-# define LLL_UNQUOTE_SPLICING            0x00000400     /* ,@ */
+# define LLL_MACRO                       0x00000080
+# define LLL_QUOTE                       0x00000100     /* ' */
+# define LLL_QUASIQUOTE                  0x00000200     /* ` */
+# define LLL_UNQUOTE                     0x00000400     /* , */
+# define LLL_UNQUOTE_SPLICING            0x00000800     /* ,@ */
 
 # define LLL_EXTERNAL_TYPE               0x00800000
 

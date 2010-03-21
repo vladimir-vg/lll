@@ -18,8 +18,6 @@ struct lll_object *prev_result;
 
 jmp_buf env_buf;
 
-#define C(X, Y) lll_cons(X, Y)
-#define S(A)    lll_get_symbol(A)
 
 int
 main(void) {

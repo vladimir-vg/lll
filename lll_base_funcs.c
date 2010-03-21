@@ -36,19 +36,24 @@ lll_cons(struct lll_object *arg1, struct lll_object *arg2) {
 }
 
 uint32_t
-lll_list_length(struct lll_pair * list) {
-        if (list == NULL || list->car == NULL) {
+lll_list_length(struct lll_pair *list) {
+        if (list == NULL) {
                 return 0;
         }
 
-        uint32_t result = 1;
-        while (list->cdr != NULL) {
+        uint32_t result = 0;
+        while (true) {
                 result++;
+
+                if (list->cdr == NULL) {
+                        break;
+                }
+
                 if (list->cdr->type_code == LLL_PAIR) {
                         list = list->cdr->d.pair;
                 }
                 else {
-                        lll_fatal_error(5, "length", __FILE__, __LINE__);
+                        lll_error(5, "length", __FILE__, __LINE__);
                 }
         }
 
@@ -152,10 +157,6 @@ lll_bf_cons(struct lll_pair *arg_list) {
 
 struct lll_object *
 lll_bf_length(struct lll_pair *arg_list) {
-        if ((arg_list->car->type_code & LLL_PAIR) == 0) {
-                lll_error(9, "length", __FILE__, __LINE__);
-        }
-
         return lll_cinteger32(lll_list_length(arg_list->car->d.pair));
 }
 

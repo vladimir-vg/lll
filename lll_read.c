@@ -284,7 +284,7 @@ parse_sexp(char *str, char *pref) {
                         lll_error(14, "found whitespace after preffix", __FILE__, __LINE__);
                 }
 
-                if (isspace(str[n]) || str[n] == '\"' || str[n] == '\0') {
+                if (isspace(str[n]) || str[n] == '\0') {
                         if (str[n] == '\0') {
                                 done = true;
                         }

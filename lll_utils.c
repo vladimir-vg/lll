@@ -51,7 +51,10 @@ const char *error_messages[] = {
         "Function ``%s'' get an EOF.\n",
 
         /* 014 */
-        "Error at reading: %s.\n"
+        "Error at reading: %s.\n",
+
+        /* 015 */
+        "Unknown ``%s'' function\n"
 };
 
 void

@@ -30,7 +30,31 @@ lll_eval(struct lll_object *obj) {
                 }
 
                 struct lll_object *binded = obj->d.pair->car->d.symbol->pair.car;
+                if (binded == LLL_UNDEFINED) {
+                        lll_error(15, symbol_string, __FILE__, __LINE__);
+                        return NULL;
+                }
+
                 uint32_t tp = binded->type_code;
+
+                int32_t l = lll_list_length(lll_cdr(obj));
+
+                switch (tp) {
+                  case LLL_BUILTIN_FUNCTION:
+                          if (binded->d.bf->args_count == -1) {
+                                  break;
+                          }
+
+                          if (l > binded->d.bf->args_count) {
+                                  lll_error(4, symbol_string, __FILE__, __LINE__);
+                          }
+                          else if (l < binded->d.bf->args_count) {
+                                  lll_error(3, symbol_string, __FILE__, __LINE__);
+                          }
+                          break;
+
+                  default:;
+                }
 
                 /* Here we calculate arguments */
                 struct lll_object *calc_arg_list = NULL;
@@ -44,7 +68,7 @@ lll_eval(struct lll_object *obj) {
 
                 if ((tp & LLL_BUILTIN_FUNCTION) != 0) {
                         if (calc_arg_list != NULL) {
-                                return lll_call_bf(obj->d.pair->car, calc_arg_list->d.pair);
+                                return lll_call_bf(obj->d.pair->car, calc_arg_list);
                         }
                         else {
                                 return lll_call_bf(obj->d.pair->car, NULL);

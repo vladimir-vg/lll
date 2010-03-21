@@ -7,16 +7,19 @@
 #include "lll_utils.h"
 #include "lll_symtable.h"
 #include "lll_base_funcs.h"
+#include "lll_eval.h"
 #include "lll_print.h"
 
-struct lll_object *lll_bf_nil_p(struct lll_pair *);
-struct lll_object *lll_bf_cons(struct lll_pair *);
-struct lll_object *lll_bf_length(struct lll_pair *);
-struct lll_object *lll_bf_car(struct lll_pair *);
-struct lll_object *lll_bf_cdr(struct lll_pair *);
-
-struct lll_object *lll_bf_quit(struct lll_pair *);
-void lll_bind_bf(lll_lisp_func, const char *, uint32_t, bool);
+struct lll_object *lll_bf_nil_p(struct lll_object *);
+struct lll_object *lll_bf_cons(struct lll_object *);
+struct lll_object *lll_bf_length(struct lll_object *);
+struct lll_object *lll_bf_car(struct lll_object *);
+struct lll_object *lll_bf_cdr(struct lll_object *);
+//struct lll_object *lll_bf_read       (struct lll_object *);
+struct lll_object *lll_bf_eval(struct lll_object *);
+struct lll_object *lll_bf_print(struct lll_object *);
+struct lll_object *lll_bf_quit(struct lll_object *);
+void lll_bind_bf(lll_lisp_func, const char *, uint32_t);
 
 bool
 lll_nil_p(struct lll_object *obj) {
@@ -36,8 +39,8 @@ lll_cons(struct lll_object *arg1, struct lll_object *arg2) {
 }
 
 uint32_t
-lll_list_length(struct lll_pair *list) {
-        if (list == NULL) {
+lll_list_length(struct lll_object * obj) {
+        if (obj == NULL) {
                 return 0;
         }
 
@@ -45,12 +48,12 @@ lll_list_length(struct lll_pair *list) {
         while (true) {
                 result++;
 
-                if (list->cdr == NULL) {
+                if (lll_cdr(obj) == NULL) {
                         break;
                 }
 
-                if (list->cdr->type_code == LLL_PAIR) {
-                        list = list->cdr->d.pair;
+                if (lll_cdr(obj)->type_code == LLL_PAIR) {
+                        obj = lll_cdr(obj);
                 }
                 else {
                         lll_error(5, "length", __FILE__, __LINE__);
@@ -61,21 +64,33 @@ lll_list_length(struct lll_pair *list) {
 }
 
 struct lll_object *
-lll_car(struct lll_pair *pair) {
+lll_car(struct lll_object *obj) {
         /* special case for NIL-symbol. It also empty list. */
-        if (pair == NULL) {
+        if (obj == NULL) {
                 return NULL;    /* Just return NIL symbol. */
         }
-        return pair->car;
+
+        if ((obj->type_code & LLL_PAIR) == 0) {
+                lll_error(9, "car", __FILE__, __LINE__);
+                return NULL;
+        }
+
+        return obj->d.pair->car;
 }
 
 struct lll_object *
-lll_cdr(struct lll_pair *pair) {
+lll_cdr(struct lll_object *obj) {
         /* special case for NIL-symbol. It also empty list. */
-        if (pair == NULL) {
+        if (obj == NULL) {
                 return NULL;    /* Just return NIL symbol. */
         }
-        return pair->cdr;
+
+        if ((obj->type_code & LLL_PAIR) == 0) {
+                lll_error(9, "cdr", __FILE__, __LINE__);
+                return NULL;
+        }
+
+        return obj->d.pair->cdr;
 }
 
 void
@@ -106,14 +121,14 @@ lll_append_to_list(struct lll_object **list, struct lll_object *obj) {
 void
 lll_append_as_last_cdr(struct lll_object **list, struct lll_object *obj) {
         struct lll_object *tmp = (*list);
-        while (tmp->d.pair->cdr != NULL) {
-                tmp = tmp->d.pair->cdr;
+        while (lll_cdr(tmp) != NULL) {
+                tmp = lll_cdr(tmp);
         }
         tmp->d.pair->cdr = obj;
 }
 
 struct lll_object *
-lll_call_bf(struct lll_object *symbol, struct lll_pair *arg_list) {
+lll_call_bf(struct lll_object *symbol, struct lll_object *arg_list) {
         if ((symbol->type_code & LLL_SYMBOL) == 0) {
                 lll_display(symbol);
                 lll_fatal_error(7, "call_bf", __FILE__, __LINE__);
@@ -126,14 +141,6 @@ lll_call_bf(struct lll_object *symbol, struct lll_pair *arg_list) {
                 lll_fatal_error(8, symbol->d.symbol->string, __FILE__, __LINE__);
         }
 
-        uint32_t l = lll_list_length(arg_list);
-        if (l > func->d.bf->args_count) {
-                lll_error(4, symbol->d.symbol->string, __FILE__, __LINE__);
-        }
-        else if (l < func->d.bf->args_count) {
-                lll_error(3, symbol->d.symbol->string, __FILE__, __LINE__);
-        }
-
         return (*func->d.bf->function) (arg_list);
 }
 
@@ -143,46 +150,65 @@ lll_call_bf(struct lll_object *symbol, struct lll_pair *arg_list) {
  */
 
 struct lll_object *
-lll_bf_nil_p(struct lll_pair *arg_list) {
-        if (arg_list->car == NULL) {
-                return LLL_T;
+lll_bf_nil_p(struct lll_object *arg_list) {
+        if (lll_car(arg_list) == NULL) {
+                return lll_get_symbol("t");
         }
         return NULL;
 }
 
 struct lll_object *
-lll_bf_cons(struct lll_pair *arg_list) {
-        return lll_cons(arg_list->car, arg_list->cdr->d.pair->car);
+lll_bf_cons(struct lll_object *arg_list) {
+        return lll_cons(lll_car(arg_list), lll_car(lll_cdr(arg_list)));
 }
 
 struct lll_object *
-lll_bf_length(struct lll_pair *arg_list) {
-        return lll_cinteger32(lll_list_length(arg_list->car->d.pair));
+lll_bf_length(struct lll_object *arg_list) {
+        return lll_cinteger32(lll_list_length(lll_car(arg_list)));
 }
 
 struct lll_object *
-lll_bf_car(struct lll_pair *arg_list) {
-        if ((arg_list->car->type_code & LLL_PAIR) == 0) {
+lll_bf_car(struct lll_object *arg_list) {
+        if ((lll_car(arg_list)->type_code & LLL_PAIR) == 0) {
                 lll_error(9, "car", __FILE__, __LINE__);
         }
 
-        return arg_list->car->d.pair->car;
+        return lll_car(lll_car(arg_list));
 }
 
 struct lll_object *
-lll_bf_cdr(struct lll_pair *arg_list) {
-        if ((arg_list->car->type_code & LLL_PAIR) == 0) {
+lll_bf_cdr(struct lll_object *arg_list) {
+        if ((lll_car(arg_list)->type_code & LLL_PAIR) == 0) {
                 lll_error(9, "cdr", __FILE__, __LINE__);
         }
 
-        return arg_list->car->d.pair->cdr;
+        return lll_car(lll_cdr(arg_list));
 }
 
 struct lll_object *
-lll_bf_quit(struct lll_pair *arg_list) {
+lll_bf_eval(struct lll_object *arg_list) {
+        lll_eval(lll_car(arg_list));
+        return NULL;
+}
+
+struct lll_object *
+lll_bf_print(struct lll_object *arg_list) {
+        if (arg_list == NULL) {
+                return NULL;
+        }
+
+        while (arg_list != NULL) {
+                lll_display(lll_car(arg_list));
+                arg_list = lll_cdr(arg_list);
+        }
+
+        return NULL;
+}
+
+struct lll_object *
+lll_bf_quit(struct lll_object *arg_list) {
         /* just ignore */
         arg_list = NULL;
-
         exit(0);
 }
 
@@ -192,27 +218,28 @@ void
 lll_bind_base_constants(void) {
         lll_bind_symbol("nil", NULL);
         lll_bind_symbol("t", LLL_T);
+        lll_bind_symbol("t", lll_get_symbol("t"));
 }
 
 void
-lll_bind_bf(lll_lisp_func f, const char *f_name, uint32_t arg_count, bool last_as_rest) {
+lll_bind_bf(lll_lisp_func f, const char *f_name, uint32_t arg_count) {
         struct lll_object *obj = MALLOC_STRUCT(lll_object);
         obj->type_code = LLL_BUILTIN_FUNCTION;
         obj->d.bf = MALLOC_STRUCT(lll_builtin_function);
 
         obj->d.bf->function = f;
         obj->d.bf->args_count = arg_count;
-        obj->d.bf->last_as_rest = last_as_rest;
         lll_bind_symbol(f_name, obj);
 }
 
 void
 lll_bind_base_functions(void) {
-        lll_bind_bf(lll_bf_nil_p, "nil?", 1, false);
-        lll_bind_bf(lll_bf_cons, "cons", 2, false);
-        lll_bind_bf(lll_bf_length, "length", 1, false);
-        lll_bind_bf(lll_bf_car, "car", 1, false);
-        lll_bind_bf(lll_bf_cdr, "cdr", 1, false);
-
-        lll_bind_bf(lll_bf_quit, "quit", 0, false);
+        lll_bind_bf(lll_bf_nil_p, "nil?", 1);
+        lll_bind_bf(lll_bf_cons, "cons", 2);
+        lll_bind_bf(lll_bf_length, "length", 1);
+        lll_bind_bf(lll_bf_car, "car", 1);
+        lll_bind_bf(lll_bf_cdr, "cdr", 1);
+        lll_bind_bf(lll_bf_eval, "eval", 1);
+        lll_bind_bf(lll_bf_print, "print", -1);
+        lll_bind_bf(lll_bf_quit, "quit", 0);
 }

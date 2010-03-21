@@ -187,6 +187,7 @@ lll_bind_symbol(const char *symbol_string, struct lll_object *obj) {
                         struct lll_object *new_pair = MALLOC_STRUCT(lll_object);
                         new_pair->type_code = LLL_PAIR;
 
+                        new_pair->d.pair = MALLOC_STRUCT(lll_pair);
                         new_pair->d.pair->car = top_pair->car;
                         new_pair->d.pair->cdr = top_pair->cdr;
                         top_pair->cdr = new_pair;

@@ -58,18 +58,17 @@ struct lll_symbol {
         const char *string;
         /* car -- last binded values.
            cdr -- previous.
-           if car == NULL, then this symbol not binded.
+           if car == LLL_UNDEFINED, then this symbol not binded.
          */
         struct lll_pair pair;
 };
 
 /* Type of function that takes list and returns lisp object. */
-typedef struct lll_object *(*lll_lisp_func) (struct lll_pair *);
+typedef struct lll_object *(*lll_lisp_func) (struct lll_object *);
 
 struct lll_builtin_function {
         lll_lisp_func function;
-        uint32_t args_count;
-        bool last_as_rest;
+        int32_t args_count;     /* -1 for any number 0.. */
 };
 
 struct lll_object *lll_quote(struct lll_object *);

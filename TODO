@@ -1,4 +1,3 @@
 * Garbage Collector.
-* rewrite parser to pretty and readable view
 * add dump_symbol_table
 * add lambda

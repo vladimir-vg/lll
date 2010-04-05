@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="lll_base_funcs.h" open="1" top="0" tabpos="4">
+		<Cursor position="429" topLine="0" />
+	</File>
+	<File name="lll_interpreter.c" open="1" top="0" tabpos="1">
+		<Cursor position="571" topLine="18" />
+	</File>
+	<File name="lll_read.c" open="1" top="1" tabpos="2">
+		<Cursor position="10777" topLine="282" />
+	</File>
+	<File name="lll_read.h" open="1" top="0" tabpos="3">
+		<Cursor position="175" topLine="0" />
+	</File>
+	<File name="lll_symtable.c" open="0" top="0" tabpos="0">
+		<Cursor position="235" topLine="4" />
+	</File>
+</CodeBlocks_layout_file>

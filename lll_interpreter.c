@@ -28,7 +28,6 @@ main(void) {
         lll_bind_base_constants();
         lll_bind_base_functions();
 
-
         /* repl */
         while (true) {
                 if (!setjmp(env_buf)) {

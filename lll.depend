@@ -1,0 +1,133 @@
+# depslib dependency file v1.0
+1269253798 source:c:\sources\lll\lll_base_funcs.c
+	<stdlib.h>
+	<string.h>
+	<stdio.h>
+	<stdbool.h>
+	"lll_types.h"
+	"lll_utils.h"
+	"lll_symtable.h"
+	"lll_base_funcs.h"
+	"lll_eval.h"
+	"lll_print.h"
+
+1269253798 c:\sources\lll\lll_types.h
+	<stdint.h>
+	<stdbool.h>
+
+1269253798 c:\sources\lll\lll_utils.h
+	<stdlib.h>
+	<stdbool.h>
+	<stdint.h>
+
+1269253798 c:\sources\lll\lll_symtable.h
+	<stdint.h>
+	"lll_types.h"
+
+1269253798 c:\sources\lll\lll_base_funcs.h
+	<stdio.h>
+	<stdbool.h>
+	"lll_types.h"
+
+1269253798 c:\sources\lll\lll_eval.h
+	"lll_types.h"
+
+1269253798 c:\sources\lll\lll_print.h
+	"lll_types.h"
+
+1269253798 source:c:\sources\lll\lll_eval.c
+	<stdint.h>
+	<string.h>
+	"lll_types.h"
+	"lll_utils.h"
+	"lll_base_funcs.h"
+	"lll_eval.h"
+	"lll_special_forms.h"
+
+1269253798 c:\sources\lll\lll_special_forms.h
+	"lll_types.h"
+
+1269273771 source:c:\sources\lll\lll_interpreter.c
+	<stdio.h>
+	<stdlib.h>
+	<setjmp.h>
+	"lll_interpreter.h"
+	"lll_types.h"
+	"lll_symtable.h"
+	"lll_base_funcs.h"
+	"lll_read.h"
+	"lll_eval.h"
+	"lll_print.h"
+	"lll_utils.h"
+
+1269255876 c:\sources\lll\lll_interpreter.h
+	<setjmp.h>
+	"lll_types.h"
+
+1269872245 c:\sources\lll\lll_read.h
+	<stdio.h>
+	"lll_types.h"
+
+1269253798 source:c:\sources\lll\lll_print.c
+	<stdio.h>
+	"lll_types.h"
+	"lll_print.h"
+	"lll_utils.h"
+
+1269802165 source:c:\sources\lll\lll_read.c
+	<stdint.h>
+	<stdbool.h>
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	<ctype.h>
+	"lll_read.h"
+	"lll_print.h"
+	"lll_symtable.h"
+	"lll_utils.h"
+	"lll_types.h"
+	"lll_base_funcs.h"
+	<stdio.h>
+	<stdint.h>
+	<stdbool.h>
+	<ctype.h>
+	<string.h>
+	"lll_read.h"
+	"lll_symtable.h"
+	"lll_base_funcs.h"
+	"lll_types.h"
+	"lll_utils.h"
+
+1269253798 source:c:\sources\lll\lll_special_forms.c
+	<stddef.h>
+	"lll_types.h"
+	"lll_eval.h"
+	"lll_symtable.h"
+	"lll_special_forms.h"
+
+1269271821 source:c:\sources\lll\lll_symtable.c
+	<stdint.h>
+	<stddef.h>
+	<string.h>
+	<stdio.h>
+	<ctype.h>
+	"lll_types.h"
+	"lll_symtable.h"
+	"lll_base_funcs.h"
+	"lll_utils.h"
+
+1269253798 source:c:\sources\lll\lll_types.c
+	<stdlib.h>
+	<stdio.h>
+	"lll_utils.h"
+	"lll_types.h"
+	"lll_symtable.h"
+
+1269253798 source:c:\sources\lll\lll_utils.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	"lll_interpreter.h"
+	"lll_utils.h"
+

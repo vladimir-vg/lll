@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="lll" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin\Debug\lll" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Debug\" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-pedantic" />
+					<Add option="-W" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-O0 --std=c99" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin\Release\lll" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Release\" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="--std=c99" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="lll_base_funcs.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lll_base_funcs.h" />
+		<Unit filename="lll_eval.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lll_eval.h" />
+		<Unit filename="lll_interpreter.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lll_interpreter.h" />
+		<Unit filename="lll_print.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lll_print.h" />
+		<Unit filename="lll_read.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lll_read.h" />
+		<Unit filename="lll_special_forms.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lll_special_forms.h" />
+		<Unit filename="lll_symtable.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lll_symtable.h" />
+		<Unit filename="lll_types.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lll_types.h" />
+		<Unit filename="lll_utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lll_utils.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

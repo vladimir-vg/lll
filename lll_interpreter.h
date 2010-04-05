@@ -7,7 +7,4 @@
 
 extern jmp_buf env_buf;
 
-extern struct lll_object *result;
-extern struct lll_object *prev_result;
-
 #endif

@@ -9,7 +9,8 @@
 #include "lll_base_funcs.h"
 #include "lll_utils.h"
 
-static struct lll_symbol_entry hash_table[UINT16_MAX + 1];      /* from 0..UINT16_MAX */
+/* from 0..UINT16_MAX */
+static struct lll_symbol_entry hash_table[UINT16_MAX + 1];
 
 uint16_t hash_func(const char *data);
 

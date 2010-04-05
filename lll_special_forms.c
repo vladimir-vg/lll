@@ -8,51 +8,51 @@
 
 struct lll_object *
 lll_and(struct lll_object *args) {
-        /* (and) without arguments return true */
-        if (args == NULL) {
-                return lll_get_symbol("t");
+    /* (and) without arguments return true */
+    if (args == NULL) {
+        return lll_get_symbol("t");
+    }
+
+    struct lll_pair *pair = args->d.pair;
+
+    struct lll_object *last = NULL;
+    while (true) {
+        last = lll_eval(pair->car);
+        if (last == NULL) {
+            return NULL;
         }
 
-        struct lll_pair *pair = args->d.pair;
-
-        struct lll_object *last = NULL;
-        while (true) {
-                last = lll_eval(pair->car);
-                if (last == NULL) {
-                        return NULL;
-                }
-
-                if (pair->cdr != NULL) {
-                        pair = pair->cdr->d.pair;
-                }
-                else {
-                        break;
-                }
+        if (pair->cdr != NULL) {
+            pair = pair->cdr->d.pair;
         }
-        return last;
+        else {
+            break;
+        }
+    }
+    return last;
 }
 
 struct lll_object *
 lll_or(struct lll_object *args) {
-        if (args == NULL) {
-                return lll_get_symbol("t");
+    if (args == NULL) {
+        return lll_get_symbol("t");
+    }
+
+    struct lll_pair *pair = args->d.pair;
+
+    struct lll_object *tmp = NULL;
+    while (true) {
+        tmp = lll_eval(pair->car);
+        if (tmp != NULL) {
+            return tmp;
         }
 
-        struct lll_pair *pair = args->d.pair;
-
-        struct lll_object *tmp = NULL;
-        while (true) {
-                tmp = lll_eval(pair->car);
-                if (tmp != NULL) {
-                        return tmp;
-                }
-
-                if (pair->cdr != NULL) {
-                        pair = pair->cdr->d.pair;
-                }
-                else {
-                        break;
-                }
+        if (pair->cdr != NULL) {
+            pair = pair->cdr->d.pair;
         }
-        return NULL;
+        else {
+            break;
+        }
+    }
+    return NULL;
 }

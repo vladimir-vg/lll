@@ -21,24 +21,22 @@ jmp_buf env_buf;
 
 int
 main(void) {
-        result = NULL;
-        prev_result = NULL;
+    result = NULL;
+    prev_result = NULL;
 
-        lll_init_symbol_table();
-        lll_bind_base_constants();
-        lll_bind_base_functions();
+    lll_init_symbol_table();
+    lll_bind_base_constants();
+    lll_bind_base_functions();
 
-        lll_print_hash_table();
-
-        /* repl */
-        while (true) {
-                if (!setjmp(env_buf)) {
-                        printf("> ");
-                        result = lll_read(stdin);
-                        lll_display(lll_eval(result));
-                        printf("\n");
-                }
+    /* repl */
+    while (true) {
+        if (!setjmp(env_buf)) {
+            printf("> ");
+            result = lll_read(stdin);
+            lll_display(lll_eval(result));
+            printf("\n");
         }
+    }
 
-        return 0;
+    return 0;
 }

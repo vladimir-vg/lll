@@ -1,6 +1,6 @@
 #!/bin/bash
 # works with GNU indent 2.2.10
-indent --line-length100                     \
+indent --line-length120                     \
        --no-tabs                            \
        --braces-on-if-line                  \
        --dont-cuddle-else                   \
@@ -19,7 +19,7 @@ indent --line-length100                     \
        --procnames-start-lines              \
        --braces-on-struct-decl-line         \
        --braces-on-func-def-line            \
-       --indent-level8                      \
+       --indent-level4                      \
        --continue-at-parentheses            \
        --parameter-indentation4             \
        --preprocessor-indentation1          \

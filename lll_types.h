@@ -27,48 +27,48 @@
 /* Some constaint pointers like NULL
    I use them only for lll_object.
  */
-# define LLL_T         ((void *) ((int) NULL + 1))
+# define LLL_VOID      ((void *) ((int) NULL + 1))
 # define LLL_UNDEFINED ((void *) ((int) NULL + 2))
 
 /* Anything lisp value representes with this structure. */
 struct lll_object {
-        uint32_t type_code;
-        /* here for exten quoting: bool ex; */
-        union {
-                void *data;
-                struct lll_object *obj; /* need's if we work with quotes */
-                struct lll_pair *pair;
-                struct lll_symbol *symbol;
-                struct lll_builtin_function *bf;
-                char c;         /* for LLL_CHAR type */
-                const char *string;     /* for LLL_STRING type */
-                int32_t integer32;      /* for LLL_INTEGER32 type */
-        } d;
+    uint32_t type_code;
+    /* here for exten quoting: bool ex; */
+    union {
+        void *data;
+        struct lll_object *obj; /* need's if we work with quotes */
+        struct lll_pair *pair;
+        struct lll_symbol *symbol;
+        struct lll_builtin_function *bf;
+        char c;                 /* for LLL_CHAR type */
+        const char *string;     /* for LLL_STRING type */
+        int32_t integer32;      /* for LLL_INTEGER32 type */
+    } d;
 };
 
 
 /* Pair structure. Cons cell. */
 struct lll_pair {
-        struct lll_object *car;
-        struct lll_object *cdr;
+    struct lll_object *car;
+    struct lll_object *cdr;
 };
 
 
 struct lll_symbol {
-        const char *string;
-        /* car -- last binded values.
-           cdr -- previous.
-           if car == LLL_UNDEFINED, then this symbol not binded.
-         */
-        struct lll_pair pair;
+    const char *string;
+    /* car -- last binded values.
+       cdr -- previous.
+       if car == LLL_UNDEFINED, then this symbol not binded.
+     */
+    struct lll_pair pair;
 };
 
 /* Type of function that takes list and returns lisp object. */
 typedef struct lll_object *(*lll_lisp_func) (struct lll_object *);
 
 struct lll_builtin_function {
-        lll_lisp_func function;
-        int32_t args_count;     /* -1 for any number 0.. */
+    lll_lisp_func function;
+    int32_t args_count;         /* -1 for any number 0.. */
 };
 
 struct lll_object *lll_quote(struct lll_object *);

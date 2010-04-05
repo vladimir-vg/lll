@@ -54,7 +54,25 @@ const char *error_messages[] = {
     "Error at reading: %s.\n",
 
     /* 015 */
-    "Unknown ``%s'' function\n"
+    "Unknown ``%s'' function\n",
+
+    /* 016 */
+    "Arithmetic function ``%s'' got non-number\n",
+
+    /* 017 */
+    "Arguments count does not match in ``%s''\n",
+
+    /* 018 */
+    "Lambda constructor get equal symbol as argument-names\n",
+
+    /* 019 */
+    "Lambda get non-symbol as argument-name\n",
+
+    /* 020 */
+    "Non-symbol object tries to binding\n",
+
+    /* 021 */
+    "Incorrect lambda form"
 };
 
 void

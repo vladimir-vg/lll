@@ -24,7 +24,9 @@ bool isallowd(char);
 void lll_init_symbol_table(void);
 struct lll_object *lll_get_binded_object(const char *);
 struct lll_object *lll_get_symbol(const char *);
-void lll_bind_symbol(const char *, struct lll_object *);
+void lll_bind_symbol(struct lll_object *, struct lll_object *);
+void lll_bind_object(const char *, struct lll_object *);
+void lll_unbind_symbol(struct lll_object *);
 bool lll_correct_symbol_string_p(const char *);
 void lll_print_hash_table(void);
 

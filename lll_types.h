@@ -22,8 +22,6 @@
 # define LLL_UNQUOTE                     0x00000400     /* , */
 # define LLL_UNQUOTE_SPLICING            0x00000800     /* ,@ */
 
-# define LLL_EXTERNAL_TYPE               0x00800000
-
 /* Some constaint pointers like NULL
    I use them only for lll_object.
  */
@@ -40,6 +38,7 @@ struct lll_object {
         struct lll_pair *pair;
         struct lll_symbol *symbol;
         struct lll_builtin_function *bf;
+        struct lll_lambda *lambda;
         char c;                 /* for LLL_CHAR type */
         const char *string;     /* for LLL_STRING type */
         int32_t integer32;      /* for LLL_INTEGER32 type */
@@ -71,6 +70,14 @@ struct lll_builtin_function {
     int32_t args_count;         /* -1 for any number 0.. */
 };
 
+struct lll_lambda {
+    /* contain list of symbol args. */
+    struct lll_object *args;
+
+    /* contain what code need to eval. */
+    struct lll_object *body;
+};
+
 struct lll_object *lll_quote(struct lll_object *);
 struct lll_object *lll_quasiquote(struct lll_object *);
 struct lll_object *lll_unquote(struct lll_object *);
@@ -80,6 +87,7 @@ struct lll_object *lll_unquote_splicing(struct lll_object *);
 struct lll_object *lll_cchar(char);
 struct lll_object *lll_cstring(const char *);
 struct lll_object *lll_cinteger32(int32_t);
+struct lll_object *lll_clambda(struct lll_object *, struct lll_object *);
 
 /* that function only constructs symbol object.
    Constructed object haven't any binding.

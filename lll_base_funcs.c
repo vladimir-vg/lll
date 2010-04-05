@@ -10,7 +10,11 @@
 #include "lll_eval.h"
 #include "lll_print.h"
 
+struct lll_object *lll_plus(struct lll_object *, struct lll_object *);
+
 struct lll_object *lll_bf_nil_p(struct lll_object *);
+struct lll_object *lll_bf_not(struct lll_object *);
+struct lll_object *lll_bf_pair_p(struct lll_object *);
 struct lll_object *lll_bf_cons(struct lll_object *);
 struct lll_object *lll_bf_list(struct lll_object *);
 struct lll_object *lll_bf_length(struct lll_object *);
@@ -19,6 +23,8 @@ struct lll_object *lll_bf_cdr(struct lll_object *);
 struct lll_object *lll_bf_eval(struct lll_object *);
 struct lll_object *lll_bf_print(struct lll_object *);
 struct lll_object *lll_bf_quit(struct lll_object *);
+struct lll_object *lll_bf_plus(struct lll_object *);
+
 void lll_bind_bf(lll_lisp_func, const char *, uint32_t);
 
 bool
@@ -128,20 +134,11 @@ lll_append_as_last_cdr(struct lll_object **list, struct lll_object *obj) {
 }
 
 struct lll_object *
-lll_call_bf(struct lll_object *symbol, struct lll_object *arg_list) {
-    if ((symbol->type_code & LLL_SYMBOL) == 0) {
-        lll_display(symbol);
-        lll_fatal_error(7, "call_bf", __FILE__, __LINE__);
+lll_plus(struct lll_object *a, struct lll_object *b) {
+    if ((a->type_code & LLL_INTEGER32) == 0 || (b->type_code & LLL_INTEGER32) == 0) {
+        lll_error(16, "+", __FILE__, __LINE__);
     }
-
-    struct lll_object *func = symbol->d.symbol->pair.car;
-
-
-    if ((func->type_code & LLL_BUILTIN_FUNCTION) == 0) {
-        lll_fatal_error(8, symbol->d.symbol->string, __FILE__, __LINE__);
-    }
-
-    return (*func->d.bf->function) (arg_list);
+    return lll_cinteger32(a->d.integer32 + b->d.integer32);
 }
 
 /***************************************************/
@@ -154,6 +151,29 @@ lll_bf_nil_p(struct lll_object *arg_list) {
     if (lll_car(arg_list) == NULL) {
         return lll_get_symbol("t");
     }
+    return NULL;
+}
+
+struct lll_object *
+lll_bf_not(struct lll_object *arg_list) {
+    if (lll_car(arg_list) == NULL) {
+        return lll_get_symbol("t");
+    }
+
+    return NULL;
+}
+
+struct lll_object *
+lll_bf_pair_p(struct lll_object *arg_list) {
+    struct lll_object *car = lll_car(arg_list);
+    if (car == NULL || car == LLL_VOID || car == LLL_UNDEFINED) {
+        return NULL;
+    }
+
+    if ((car->type_code & LLL_PAIR) != 0) {
+        return lll_get_symbol("t");
+    }
+
     return NULL;
 }
 
@@ -216,13 +236,25 @@ lll_bf_quit(struct lll_object *arg_list) {
     exit(0);
 }
 
+struct lll_object *
+lll_bf_plus(struct lll_object *arg_list) {
+    struct lll_object *result = lll_cinteger32(0);
+
+    while (arg_list != NULL) {
+        result = lll_plus(result, lll_car(arg_list));
+        arg_list = lll_cdr(arg_list);
+    }
+
+    return result;
+}
+
 /***************************************************/
 
 void
 lll_bind_base_constants(void) {
-    lll_bind_symbol("nil", NULL);
-    lll_bind_symbol("t", NULL);
-    lll_bind_symbol("t", lll_get_symbol("t"));
+    lll_bind_object("nil", NULL);
+    lll_bind_object("t", NULL);
+    lll_bind_object("t", lll_get_symbol("t"));
 }
 
 void
@@ -233,12 +265,14 @@ lll_bind_bf(lll_lisp_func f, const char *f_name, uint32_t arg_count) {
 
     obj->d.bf->function = f;
     obj->d.bf->args_count = arg_count;
-    lll_bind_symbol(f_name, obj);
+    lll_bind_object(f_name, obj);
 }
 
 void
 lll_bind_base_functions(void) {
     lll_bind_bf(lll_bf_nil_p, "nil?", 1);
+    lll_bind_bf(lll_bf_not, "not", 1);
+    lll_bind_bf(lll_bf_pair_p, "pair?", 1);
     lll_bind_bf(lll_bf_cons, "cons", 2);
     lll_bind_bf(lll_bf_list, "list", -1);
     lll_bind_bf(lll_bf_length, "length", 1);
@@ -247,4 +281,5 @@ lll_bind_base_functions(void) {
     lll_bind_bf(lll_bf_eval, "eval", 1);
     lll_bind_bf(lll_bf_print, "print", -1);
     lll_bind_bf(lll_bf_quit, "quit", 0);
+    lll_bind_bf(lll_bf_plus, "+", -1);
 }

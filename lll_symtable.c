@@ -154,7 +154,27 @@ lll_get_symbol(const char *symbol_string) {
 
 
 void
-lll_bind_symbol(const char *symbol_string, struct lll_object *obj) {
+lll_bind_symbol(struct lll_object *sym, struct lll_object *obj) {
+    if ((sym->type_code & LLL_SYMBOL) == 0) {
+        lll_error(20, NULL, __FILE__, __LINE__);
+    }
+
+    struct lll_pair *top_pair = &sym->d.symbol->pair;
+    struct lll_object *new_pair = MALLOC_STRUCT(lll_object);
+    new_pair->type_code = LLL_PAIR;
+    new_pair->d.pair = MALLOC_STRUCT(lll_pair);
+
+    new_pair->d.pair->car = top_pair->car;
+    new_pair->d.pair->cdr = top_pair->cdr;
+    top_pair->car = obj;
+    top_pair->cdr = new_pair;
+
+    return;
+}
+
+
+void
+lll_bind_object(const char *symbol_string, struct lll_object *obj) {
     if (!lll_correct_symbol_string_p(symbol_string)) {
         lll_error(2, symbol_string, __FILE__, __LINE__);
     }
@@ -187,15 +207,7 @@ lll_bind_symbol(const char *symbol_string, struct lll_object *obj) {
 
         if (strcmp(entry->string, lowercase_version) == 0) {
             free(lowercase_version);
-            struct lll_pair *top_pair = &entry->symbol->d.symbol->pair;
-            struct lll_object *new_pair = MALLOC_STRUCT(lll_object);
-            new_pair->type_code = LLL_PAIR;
-            new_pair->d.pair = MALLOC_STRUCT(lll_pair);
-
-            new_pair->d.pair->car = top_pair->car;
-            new_pair->d.pair->cdr = top_pair->cdr;
-            top_pair->car = obj;
-            top_pair->cdr = new_pair;
+            lll_bind_symbol(entry->symbol, obj);
 
             return;
         }
@@ -203,6 +215,16 @@ lll_bind_symbol(const char *symbol_string, struct lll_object *obj) {
         /* if strings different we must search another. */
         entry = entry->another_entry;
     }
+}
+
+/* takes symbol */
+void
+lll_unbind_symbol(struct lll_object *sym) {
+    struct lll_pair *p = &sym->d.symbol->pair;
+
+    /* here leak. later must be fixed. */
+    sym->d.symbol->pair.car = p->cdr->d.pair->car;
+    sym->d.symbol->pair.cdr = p->cdr->d.pair->cdr;
 }
 
 void

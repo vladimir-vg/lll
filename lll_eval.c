@@ -4,8 +4,60 @@
 #include "lll_types.h"
 #include "lll_utils.h"
 #include "lll_base_funcs.h"
+#include "lll_symtable.h"
+#include "lll_print.h"
 #include "lll_eval.h"
 #include "lll_special_forms.h"
+
+struct lll_object *call_lambda(struct lll_object *, struct lll_object *);
+
+struct lll_object *
+lll_call_bf(struct lll_object *symbol, struct lll_object *arg_list) {
+    if ((symbol->type_code & LLL_SYMBOL) == 0) {
+        lll_display(symbol);
+        lll_fatal_error(7, "call_bf", __FILE__, __LINE__);
+    }
+
+    struct lll_object *func = symbol->d.symbol->pair.car;
+
+
+    if ((func->type_code & LLL_BUILTIN_FUNCTION) == 0) {
+        lll_fatal_error(8, symbol->d.symbol->string, __FILE__, __LINE__);
+    }
+
+    return (*func->d.bf->function) (arg_list);
+}
+
+struct lll_object *
+call_lambda(struct lll_object *l, struct lll_object *args) {
+    if (lll_list_length(args) != lll_list_length(l->d.lambda->args)) {
+        lll_error(17, "lambda", __FILE__, __LINE__);
+    }
+
+    struct lll_object *largs = l->d.lambda->args;
+    while (largs != NULL) {
+        lll_bind_symbol(lll_car(largs), lll_car(args));
+
+        largs = lll_cdr(largs);
+        args = lll_cdr(args);
+    }
+
+    struct lll_object *lbody = l->d.lambda->body;
+    struct lll_object *result = NULL;
+    while (lbody != NULL) {
+        result = lll_eval(lll_car(lbody));
+        lbody = lll_cdr(lbody);
+    }
+
+    largs = l->d.lambda->args;
+    while (largs != NULL) {
+        lll_unbind_symbol(lll_car(largs));
+
+        largs = lll_cdr(largs);
+    }
+
+    return result;
+}
 
 struct lll_object *
 lll_eval(struct lll_object *obj) {
@@ -15,7 +67,18 @@ lll_eval(struct lll_object *obj) {
 
     /* if we get an s-expression */
     if ((obj->type_code & LLL_PAIR) != 0) {
+        /* here leak too */
+        if ((lll_car(obj)->type_code & LLL_PAIR) != 0) {
+            obj->d.pair->car = lll_eval(lll_car(obj));
+        }
+
+        if ((lll_car(obj)->type_code & LLL_LAMBDA) != 0) {
+            return call_lambda(lll_car(obj), lll_cdr(obj));
+        }
+
         if ((lll_car(obj)->type_code & LLL_SYMBOL) == 0) {
+            lll_display(obj);
+            printf("\n");
             lll_error(7, "eval", __FILE__, __LINE__);
             return NULL;
         }
@@ -27,6 +90,14 @@ lll_eval(struct lll_object *obj) {
         }
         else if (strcmp(symbol_string, "or") == 0) {
             return lll_or(obj->d.pair->cdr);
+        }
+        else if (strcmp(symbol_string, "lambda") == 0) {
+            if (lll_list_length(obj) < 3) {
+                lll_error(21, NULL, __FILE__, __LINE__);
+            }
+            struct lll_object *args = lll_car(lll_cdr(obj));
+            struct lll_object *body = lll_cdr(lll_cdr(obj));
+            return lll_clambda(args, body);
         }
 
         struct lll_object *binded = lll_car(obj)->d.symbol->pair.car;
@@ -61,7 +132,7 @@ lll_eval(struct lll_object *obj) {
         struct lll_object *tmp = NULL;
         struct lll_object *arg_list = obj->d.pair->cdr;
         while (arg_list != NULL) {
-            tmp = lll_eval(arg_list->d.pair->car);
+            tmp = lll_eval(lll_car(arg_list));
             lll_append_to_list(&calc_arg_list, tmp);
             arg_list = arg_list->d.pair->cdr;
         }

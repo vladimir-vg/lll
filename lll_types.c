@@ -1,9 +1,12 @@
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
 #include "lll_utils.h"
 #include "lll_types.h"
+#include "lll_print.h"
 #include "lll_symtable.h"
+#include "lll_base_funcs.h"
 
 struct lll_object *
 lll_quote(struct lll_object *obj) {
@@ -69,6 +72,43 @@ lll_cinteger32(int32_t i) {
 
     result->type_code = LLL_INTEGER32;
     result->d.integer32 = i;
+
+    return result;
+}
+
+struct lll_object *
+lll_clambda(struct lll_object *args, struct lll_object *body) {
+    struct lll_object *tmp = args;
+    while (tmp != NULL) {
+        if ((lll_car(tmp)->type_code & LLL_SYMBOL) == 0) {
+            lll_error(19, NULL, __FILE__, __LINE__);
+        }
+        tmp = lll_cdr(tmp);
+    }
+
+    /* check for eq args */
+    if (args != NULL) {
+        struct lll_object *car = lll_car(args);
+        struct lll_object *cdr = lll_cdr(args);
+        while (cdr != NULL) {
+            struct lll_object *lcdr = cdr;
+            while (lcdr != NULL) {
+                struct lll_object *lcar = lll_car(lcdr);
+                if (strcmp(car->d.symbol->string, lcar->d.symbol->string) == 0) {
+                    lll_error(18, NULL, __FILE__, __LINE__);
+                }
+                lcdr = lll_cdr(lcdr);
+            }
+            car = lll_car(cdr);
+            cdr = lll_cdr(cdr);
+        }
+    }
+
+    struct lll_object *result = MALLOC_STRUCT(lll_object);
+    result->d.lambda = MALLOC_STRUCT(lll_lambda);
+    result->type_code = LLL_LAMBDA;
+    result->d.lambda->args = args;
+    result->d.lambda->body = body;
 
     return result;
 }

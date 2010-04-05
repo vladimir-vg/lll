@@ -7,12 +7,12 @@
 
 /* Prints object as text to file. */
 void
-lll_displayf(FILE *fd, struct lll_object *obj) {
+lll_displayf(FILE * fd, struct lll_object *obj) {
     lll_displayf_sub(fd, obj);
 }
 
 void
-lll_displayf_sub(FILE *fd, struct lll_object *obj) {
+lll_displayf_sub(FILE * fd, struct lll_object *obj) {
     if (obj == NULL) {
         fprintf(fd, "nil");
         return;

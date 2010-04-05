@@ -12,10 +12,12 @@
 
 
 struct lll_symbol_entry {
+        /* here stores symbol-string */
+        const char *string;
         /* Symbol contains binded values and string */
         struct lll_object *symbol;
-        /* Pointer to entry, with same hashcode, but different string. */
-        struct lll_symbol_entry *another_string;
+        /* Pointer to entry, with same hashcode, but different string */
+        struct lll_symbol_entry *another_entry;
 };
 
 bool isallowd(char);
@@ -24,5 +26,6 @@ struct lll_object *lll_get_binded_object(const char *);
 struct lll_object *lll_get_symbol(const char *);
 void lll_bind_symbol(const char *, struct lll_object *);
 bool lll_correct_symbol_string_p(const char *);
+void lll_print_hash_table(void);
 
 #endif

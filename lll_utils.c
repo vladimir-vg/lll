@@ -81,30 +81,20 @@ lll_error(uint32_t error_code, const char *message, const char *filename, const 
         longjmp(env_buf, 1);
 }
 
-/* if conversion not need -- just return arg.
-   else malloc mem for lowercase-version.
+/* returns copy of lowercase version string.
  */
 char *
-lll_to_lowercase(const char *string, bool * allocated) {
+lll_to_lowercase(const char *string) {
         int length = strlen(string);
-        (*allocated) = false;
-        char *result = (char *) string;
+        char *result = (char *) malloc(length+1);
         for (int i = 0; i < length; ++i) {
-                if (isalpha((string)[i]) && isupper(string[i])) {
-                        if (*allocated) {
-                                result[i] = tolower(string[i]);
-                        }
-                        else {
-                                result = (char *) malloc(strlen(string) + 1);
-                                strcpy(result, string);
-                                result[i] = tolower(string[i]);
-                                (*allocated) = true;
-                        }
+                if (islower(string[i])) {
+                        result[i] = tolower(string[i]);
+                }
+                else {
+                        result[i] = tolower(string[i]);
                 }
         }
-
-        /* it is safe, because we control with 'allocated' variable
-           in get_binded_object bind_object functions.
-         */
+        result[length] = '\0';
         return result;
 }

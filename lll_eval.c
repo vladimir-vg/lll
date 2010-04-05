@@ -15,21 +15,21 @@ lll_eval(struct lll_object *obj) {
 
         /* if we get an s-expression */
         if ((obj->type_code & LLL_PAIR) != 0) {
-                if ((obj->d.pair->car->type_code & LLL_SYMBOL) == 0) {
+                if ((lll_car(obj)->type_code & LLL_SYMBOL) == 0) {
                         lll_error(7, "eval", __FILE__, __LINE__);
                         return NULL;
                 }
 
                 /* check for special forms */
-                const char *symbol_string = obj->d.pair->car->d.symbol->string;
+                const char *symbol_string = lll_car(obj)->d.symbol->string;
                 if (strcmp(symbol_string, "and") == 0) {
-                        return lll_and(obj->d.pair->cdr);
+                        return lll_and(lll_cdr(obj));
                 }
                 else if (strcmp(symbol_string, "or") == 0) {
                         return lll_or(obj->d.pair->cdr);
                 }
 
-                struct lll_object *binded = obj->d.pair->car->d.symbol->pair.car;
+                struct lll_object *binded = lll_car(obj)->d.symbol->pair.car;
                 if (binded == LLL_UNDEFINED) {
                         lll_error(15, symbol_string, __FILE__, __LINE__);
                         return NULL;

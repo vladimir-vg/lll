@@ -9,7 +9,6 @@
 void
 lll_displayf(FILE * fd, struct lll_object *obj) {
         lll_displayf_sub(fd, obj);
-        fprintf(fd, "\n");
 }
 
 void

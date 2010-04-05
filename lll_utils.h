@@ -9,6 +9,6 @@
 
 void lll_fatal_error(uint32_t, const char *, const char *, uint32_t);
 void lll_error(uint32_t, const char *, const char *, uint32_t);
-char *lll_to_lowercase(const char *, bool *);
+char *lll_to_lowercase(const char *);
 
 #endif

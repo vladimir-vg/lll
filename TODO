@@ -1,3 +1,4 @@
 * Garbage Collector.
 * add dump_symbol_table
 * add lambda
+* all immutable strings must be stored in hash_table.

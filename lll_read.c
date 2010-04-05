@@ -6,7 +6,6 @@
 #include <ctype.h>
 
 #include "lll_read.h"
-#include "lll_print.h"
 #include "lll_symtable.h"
 #include "lll_utils.h"
 #include "lll_types.h"

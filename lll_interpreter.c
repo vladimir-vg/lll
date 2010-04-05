@@ -28,12 +28,15 @@ main(void) {
         lll_bind_base_constants();
         lll_bind_base_functions();
 
+        lll_print_hash_table();
+
         /* repl */
         while (true) {
                 if (!setjmp(env_buf)) {
                         printf("> ");
                         result = lll_read(stdin);
                         lll_display(lll_eval(result));
+                        printf("\n");
                 }
         }
 

@@ -44,13 +44,13 @@ lll_cons(struct lll_object *arg1, struct lll_object *arg2) {
     return result;
 }
 
-uint32_t
+int32_t
 lll_list_length(struct lll_object * obj) {
     if (obj == NULL) {
         return 0;
     }
 
-    uint32_t result = 0;
+    int32_t result = 0;
     while (true) {
         result++;
 
@@ -91,9 +91,11 @@ lll_cdr(struct lll_object *obj) {
         return NULL;            /* Just return NIL symbol. */
     }
 
-    if ((obj->type_code & LLL_PAIR) == 0) {
+    if (lll_pair_p(obj) == NULL) {
+        printf("error: ");
+        lll_display(obj);
+        printf("\n");
         lll_error(9, "cdr", __FILE__, __LINE__);
-        return NULL;
     }
 
     return obj->d.pair->cdr;
@@ -166,7 +168,7 @@ lll_bf_not(struct lll_object *arg_list) {
 struct lll_object *
 lll_bf_pair_p(struct lll_object *arg_list) {
     struct lll_object *car = lll_car(arg_list);
-    if (car == NULL || car == LLL_VOID || car == LLL_UNDEFINED) {
+    if (car == NULL || car == LLL_VOID() || car == LLL_UNDEFINED()) {
         return NULL;
     }
 
@@ -226,7 +228,7 @@ lll_bf_print(struct lll_object *arg_list) {
         arg_list = lll_cdr(arg_list);
     }
 
-    return LLL_VOID;
+    return LLL_VOID();
 }
 
 struct lll_object *
@@ -253,8 +255,15 @@ lll_bf_plus(struct lll_object *arg_list) {
 void
 lll_bind_base_constants(void) {
     lll_bind_object("nil", NULL);
+
     lll_bind_object("t", NULL);
     lll_bind_object("t", lll_get_symbol("t"));
+
+    lll_bind_object("void", NULL);
+    lll_bind_object("void", lll_get_symbol("void"));
+
+    lll_bind_object("undefined", NULL);
+    lll_bind_object("undefined", lll_get_symbol("undefined"));
 }
 
 void

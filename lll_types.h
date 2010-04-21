@@ -22,12 +22,6 @@
 # define LLL_UNQUOTE                     0x00000400     /* , */
 # define LLL_UNQUOTE_SPLICING            0x00000800     /* ,@ */
 
-/* Some constaint pointers like NULL
-   I use them only for lll_object.
- */
-# define LLL_VOID      ((void *) ((int) NULL + 1))
-# define LLL_UNDEFINED ((void *) ((int) NULL + 2))
-
 /* Anything lisp value representes with this structure. */
 struct lll_object {
     uint32_t type_code;
@@ -46,6 +40,12 @@ struct lll_object {
 };
 
 
+/* Some constaint pointers like NULL
+ */
+struct lll_object *LLL_VOID(void);
+struct lll_object *LLL_UNDEFINED(void);
+
+
 /* Pair structure. Cons cell. */
 struct lll_pair {
     struct lll_object *car;
@@ -57,9 +57,9 @@ struct lll_symbol {
     const char *string;
     /* car -- last binded values.
        cdr -- previous.
-       if car == LLL_UNDEFINED, then this symbol not binded.
+       if car == LLL_UNDEFINED(), then this symbol not binded.
      */
-    struct lll_pair pair;
+    struct lll_object *pair;
 };
 
 /* Type of function that takes list and returns lisp object. */
@@ -67,7 +67,7 @@ typedef struct lll_object *(*lll_lisp_func) (struct lll_object *);
 
 struct lll_builtin_function {
     lll_lisp_func function;
-    int32_t args_count;         /* -1 for any number 0.. */
+    int32_t args_count;         /* -1 for any number */
 };
 
 struct lll_lambda {
@@ -77,6 +77,19 @@ struct lll_lambda {
     /* contain what code need to eval. */
     struct lll_object *body;
 };
+
+struct lll_object *lll_pair_p(struct lll_object *);
+struct lll_object *lll_symbol_p(struct lll_object *);
+struct lll_object *lll_char_p(struct lll_object *);
+struct lll_object *lll_string_p(struct lll_object *);
+struct lll_object *lll_integer32_p(struct lll_object *);
+struct lll_object *lll_lambda_p(struct lll_object *);
+struct lll_object *lll_bf_p(struct lll_object *);
+struct lll_object *lll_macro_p(struct lll_object *);
+struct lll_object *lll_quote_p(struct lll_object *);
+struct lll_object *lll_quasiquote_p(struct lll_object *);
+struct lll_object *lll_unquote_p(struct lll_object *);
+struct lll_object *lll_unquote_splicing_p(struct lll_object *);
 
 struct lll_object *lll_quote(struct lll_object *);
 struct lll_object *lll_quasiquote(struct lll_object *);

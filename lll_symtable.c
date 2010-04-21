@@ -89,7 +89,7 @@ lll_init_symbol_table(void) {
 struct lll_object *
 lll_get_binded_object(const char *symbol_string) {
     struct lll_object *obj = lll_get_symbol(symbol_string);
-    return obj->d.symbol->pair.car;
+    return lll_car(obj->d.symbol->pair);
 }
 
 
@@ -116,7 +116,7 @@ lll_get_symbol(const char *symbol_string) {
             entry->string = lowercase_version;
 
             struct lll_object *obj = lll_csymbol(entry->string);
-            obj->d.symbol->pair.car = LLL_UNDEFINED;
+            //obj->d.symbol->pair->d.obj = lll_cons(LLL_UNDEFINED(), NULL);
 
             entry->symbol = obj;
             entry->another_entry = NULL;
@@ -127,7 +127,7 @@ lll_get_symbol(const char *symbol_string) {
         if (entry->string == NULL) {
             entry->string = lowercase_version;
             entry->symbol = lll_csymbol(entry->string);
-            entry->symbol->d.symbol->pair.car = LLL_UNDEFINED;
+            entry->symbol->d.symbol->pair->d.obj = lll_cons(LLL_UNDEFINED(), NULL);
 
             return entry->symbol;
         }
@@ -139,7 +139,7 @@ lll_get_symbol(const char *symbol_string) {
             /* string not binded yet */
             if (entry->symbol == NULL) {
                 entry->symbol = lll_csymbol(entry->string);
-                entry->symbol->d.symbol->pair.car = LLL_UNDEFINED;
+                entry->symbol->d.symbol->pair->d.obj = lll_cons(LLL_UNDEFINED(), NULL);
 
                 return entry->symbol;
             }
@@ -159,15 +159,11 @@ lll_bind_symbol(struct lll_object *sym, struct lll_object *obj) {
         lll_error(20, NULL, __FILE__, __LINE__);
     }
 
-    struct lll_pair *top_pair = &sym->d.symbol->pair;
-    struct lll_object *new_pair = MALLOC_STRUCT(lll_object);
-    new_pair->type_code = LLL_PAIR;
-    new_pair->d.pair = MALLOC_STRUCT(lll_pair);
+    struct lll_object *top_pair = sym->d.symbol->pair;
+    struct lll_object *new_pair = lll_cons(lll_car(top_pair), lll_cdr(top_pair));
 
-    new_pair->d.pair->car = top_pair->car;
-    new_pair->d.pair->cdr = top_pair->cdr;
-    top_pair->car = obj;
-    top_pair->cdr = new_pair;
+    top_pair->d.pair->car = obj;
+    top_pair->d.pair->cdr = new_pair;
 
     return;
 }
@@ -189,7 +185,7 @@ lll_bind_object(const char *symbol_string, struct lll_object *obj) {
             entry = MALLOC_STRUCT(lll_symbol_entry);
             entry->string = lowercase_version;
             entry->symbol = lll_csymbol(entry->string);
-            entry->symbol->d.symbol->pair.car = obj;
+            entry->symbol->d.symbol->pair = lll_cons(obj, NULL);
             entry->another_entry = NULL;
 
             return;
@@ -199,7 +195,7 @@ lll_bind_object(const char *symbol_string, struct lll_object *obj) {
         if (entry->string == NULL) {
             entry->string = lowercase_version;
             entry->symbol = lll_csymbol(entry->string);
-            entry->symbol->d.symbol->pair.car = obj;
+            entry->symbol->d.symbol->pair = lll_cons(obj, NULL);
             entry->another_entry = NULL;
 
             return;
@@ -220,52 +216,31 @@ lll_bind_object(const char *symbol_string, struct lll_object *obj) {
 /* takes symbol */
 void
 lll_unbind_symbol(struct lll_object *sym) {
-    struct lll_pair *p = &sym->d.symbol->pair;
+    struct lll_object *p = sym->d.symbol->pair;
 
     /* here leak. later must be fixed. */
-    sym->d.symbol->pair.car = p->cdr->d.pair->car;
-    sym->d.symbol->pair.cdr = p->cdr->d.pair->cdr;
+    sym->d.symbol->pair->d.pair->car = lll_car(lll_cdr(p));
+    sym->d.symbol->pair->d.pair->cdr = lll_cdr(lll_cdr(p));
 }
 
-void
-lll_print_hash_table() {
+struct lll_object *
+lll_dump_hash_table() {
+    struct lll_object *result = NULL;
     for (uint16_t i = 0; i < UINT16_MAX; ++i) {
         if (hash_table[i].string != NULL) {
-            printf("(%d\t('%s': ", i, hash_table[i].string);
-
-            struct lll_pair *p = &hash_table[i].symbol->d.symbol->pair;
-            while (p != NULL) {
-                lll_display(p->car);
-                if (p->cdr == NULL) {
-                    break;
-                }
-                else {
-                    p = p->cdr->d.pair;
-                }
-                printf(" -> ");
-            }
-
-            printf(")\n");
-
-            struct lll_symbol_entry *entry = hash_table[i].another_entry;
-            while (entry != NULL) {
-                printf("\t('%s': ", entry->string);
-
-                struct lll_pair *p = &entry->symbol->d.symbol->pair;
+            struct lll_object *l_entry = NULL;
+            lll_append_to_list(&l_entry, lll_cinteger32(i));
+            struct lll_symbol_entry *e = &hash_table[i];
+            while (e != NULL) {
+                struct lll_object *p = e->symbol->d.symbol->pair;
                 while (p != NULL) {
-                    lll_display(p->car);
-                    printf(" ");
-                    if (p->cdr == NULL) {
-                        break;
-                    }
-                    else {
-                        p = p->cdr->d.pair;
-                    }
+                    lll_append_to_list(&l_entry, lll_cons(e->symbol, lll_car(p)));
+                    p = p->d.pair->cdr;
                 }
-
-                printf(")\n");
+                e = e->another_entry;
             }
-            printf("\t)\n\n");
+            lll_append_to_list(&result, l_entry);
         }
     }
+    return result;
 }

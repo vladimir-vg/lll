@@ -72,7 +72,13 @@ const char *error_messages[] = {
     "Non-symbol object tries to binding\n",
 
     /* 021 */
-    "Incorrect lambda form"
+    "Incorrect lambda form",
+
+    /* 022 */
+    "Symbol ``%s'' is undefined",
+
+    /* 023 */
+    "Error at eval: ``%s''\n"
 };
 
 void

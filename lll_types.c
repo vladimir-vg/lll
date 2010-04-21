@@ -9,6 +9,76 @@
 #include "lll_base_funcs.h"
 
 struct lll_object *
+LLL_VOID() {
+    return (struct lll_object *) 2;
+}
+
+struct lll_object *
+LLL_UNDEFINED() {
+    return (struct lll_object *) 1;
+}
+
+struct lll_object *
+lll_pair_p(struct lll_object *obj) {
+    return ((obj->type_code & LLL_PAIR) == 0) ? NULL : lll_get_symbol("t");
+}
+
+struct lll_object *
+lll_symbol_p(struct lll_object *obj) {
+    return ((obj->type_code & LLL_SYMBOL) == 0) ? NULL : lll_get_symbol("t");
+}
+
+struct lll_object *
+lll_char_p(struct lll_object *obj) {
+    return ((obj->type_code & LLL_CHAR) == 0) ? NULL : lll_get_symbol("t");
+}
+
+struct lll_object *
+lll_string_p(struct lll_object *obj) {
+    return ((obj->type_code & LLL_STRING) == 0) ? NULL : lll_get_symbol("t");
+}
+
+struct lll_object *
+lll_integer32_p(struct lll_object *obj) {
+    return ((obj->type_code & LLL_INTEGER32) == 0) ? NULL : lll_get_symbol("t");
+}
+
+struct lll_object *
+lll_lambda_p(struct lll_object *obj) {
+    return ((obj->type_code & LLL_LAMBDA) == 0) ? NULL : lll_get_symbol("t");
+}
+
+struct lll_object *
+lll_bf_p(struct lll_object *obj) {
+    return ((obj->type_code & LLL_BUILTIN_FUNCTION) == 0) ? NULL : lll_get_symbol("t");
+}
+
+struct lll_object *
+lll_macro_p(struct lll_object *obj) {
+    return ((obj->type_code & LLL_MACRO) == 0) ? NULL : lll_get_symbol("t");
+}
+
+struct lll_object *
+lll_quote_p(struct lll_object *obj) {
+    return ((obj->type_code & LLL_QUOTE) == 0) ? NULL : lll_get_symbol("t");
+}
+
+struct lll_object *
+lll_quasiquote_p(struct lll_object *obj) {
+    return ((obj->type_code & LLL_QUASIQUOTE) == 0) ? NULL : lll_get_symbol("t");
+}
+
+struct lll_object *
+lll_unquote_p(struct lll_object *obj) {
+    return ((obj->type_code & LLL_UNQUOTE) == 0) ? NULL : lll_get_symbol("t");
+}
+
+struct lll_object *
+lll_unquote_splicing_p(struct lll_object *obj) {
+    return ((obj->type_code & LLL_UNQUOTE_SPLICING) == 0) ? NULL : lll_get_symbol("t");
+}
+
+struct lll_object *
 lll_quote(struct lll_object *obj) {
     struct lll_object *result = MALLOC_STRUCT(lll_object);
     result->type_code = LLL_QUOTE;
@@ -126,8 +196,7 @@ lll_csymbol(const char *symbol_string) {
     struct lll_object *obj = MALLOC_STRUCT(lll_object);
     obj->d.symbol = MALLOC_STRUCT(lll_symbol);
     obj->type_code = LLL_SYMBOL;
-    obj->d.symbol->pair.car = NULL;
-    obj->d.symbol->pair.cdr = NULL;
+    obj->d.symbol->pair = lll_cons(LLL_UNDEFINED(), NULL);
     obj->d.symbol->string = symbol_string;
     return obj;
 }

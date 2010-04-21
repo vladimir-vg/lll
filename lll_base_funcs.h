@@ -18,6 +18,6 @@ struct lll_object *lll_call_bf(struct lll_object *, struct lll_object *arg_list)
 void lll_bind_base_constants(void);
 void lll_bind_base_functions(void);
 
-uint32_t lll_list_length(struct lll_object *list);
+int32_t lll_list_length(struct lll_object *list);
 
 #endif

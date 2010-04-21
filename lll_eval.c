@@ -10,16 +10,23 @@
 #include "lll_special_forms.h"
 
 struct lll_object *call_lambda(struct lll_object *, struct lll_object *);
+struct lll_object *calculate_list(struct lll_object *);
 
 struct lll_object *
 lll_call_bf(struct lll_object *symbol, struct lll_object *arg_list) {
+#ifdef LLL_DEBUG
+    printf("call_bf: ");
+    lll_display(symbol);
+    printf(" ");
+    lll_display(arg_list);
+    printf("\n");
+#endif
     if ((symbol->type_code & LLL_SYMBOL) == 0) {
         lll_display(symbol);
         lll_fatal_error(7, "call_bf", __FILE__, __LINE__);
     }
 
-    struct lll_object *func = symbol->d.symbol->pair.car;
-
+    struct lll_object *func = lll_car(symbol->d.symbol->pair);
 
     if ((func->type_code & LLL_BUILTIN_FUNCTION) == 0) {
         lll_fatal_error(8, symbol->d.symbol->string, __FILE__, __LINE__);
@@ -60,122 +67,93 @@ call_lambda(struct lll_object *l, struct lll_object *args) {
 }
 
 struct lll_object *
+calculate_list(struct lll_object *args) {
+    struct lll_object *result = NULL;
+    struct lll_object *tmp = NULL;
+    while (args != NULL) {
+        tmp = lll_eval(lll_car(args));
+        lll_append_to_list(&result, tmp);
+        args = lll_cdr(args);
+    }
+    return result;
+}
+
+struct lll_object *
 lll_eval(struct lll_object *obj) {
     if (obj == NULL) {
         return NULL;
     }
 
-    /* if we get an s-expression */
-    if ((obj->type_code & LLL_PAIR) != 0) {
-        /* here leak too */
-        if ((lll_car(obj)->type_code & LLL_PAIR) != 0) {
-            obj->d.pair->car = lll_eval(lll_car(obj));
+    if (obj == LLL_UNDEFINED()) {
+        lll_error(23, "get undefined value", __FILE__, __LINE__);
+    }
+
+    if (obj == LLL_VOID()) {
+        lll_error(23, "get void value", __FILE__, __LINE__);
+    }
+
+
+    if (lll_integer32_p(obj) != NULL || lll_string_p(obj) != NULL || lll_char_p(obj) != NULL) {
+        return obj;
+    }
+    else if (lll_quote_p(obj) != NULL) {
+        return obj->d.obj;
+    }
+    else if (lll_symbol_p(obj) != NULL) {
+        struct lll_symbol *sym = obj->d.symbol;
+        struct lll_object *car = lll_car(sym->pair);
+
+        if (car == LLL_UNDEFINED()) {
+            lll_error(23, "symbol has undefined value", __FILE__, __LINE__);
         }
-
-        if ((lll_car(obj)->type_code & LLL_LAMBDA) != 0) {
-            return call_lambda(lll_car(obj), lll_cdr(obj));
-        }
-
-        if ((lll_car(obj)->type_code & LLL_SYMBOL) == 0) {
-            lll_display(obj);
-            printf("\n");
-            lll_error(7, "eval", __FILE__, __LINE__);
-            return NULL;
-        }
-
-        /* check for special forms */
-        const char *symbol_string = lll_car(obj)->d.symbol->string;
-        if (strcmp(symbol_string, "and") == 0) {
-            return lll_and(lll_cdr(obj));
-        }
-        else if (strcmp(symbol_string, "or") == 0) {
-            return lll_or(obj->d.pair->cdr);
-        }
-        else if (strcmp(symbol_string, "lambda") == 0) {
-            if (lll_list_length(obj) < 3) {
-                lll_error(21, NULL, __FILE__, __LINE__);
-            }
-            struct lll_object *args = lll_car(lll_cdr(obj));
-            struct lll_object *body = lll_cdr(lll_cdr(obj));
-            return lll_clambda(args, body);
-        }
-
-        struct lll_object *binded = lll_car(obj)->d.symbol->pair.car;
-        if (binded == LLL_UNDEFINED) {
-            lll_error(15, symbol_string, __FILE__, __LINE__);
-            return NULL;
-        }
-
-        uint32_t tp = binded->type_code;
-
-        int32_t l = lll_list_length(lll_cdr(obj));
-
-        switch (tp) {
-          case LLL_BUILTIN_FUNCTION:
-              if (binded->d.bf->args_count == -1) {
-                  break;
-              }
-
-              if (l > binded->d.bf->args_count) {
-                  lll_error(4, symbol_string, __FILE__, __LINE__);
-              }
-              else if (l < binded->d.bf->args_count) {
-                  lll_error(3, symbol_string, __FILE__, __LINE__);
-              }
-              break;
-
-          default:;
-        }
-
-        /* Here we calculate arguments */
-        struct lll_object *calc_arg_list = NULL;
-        struct lll_object *tmp = NULL;
-        struct lll_object *arg_list = obj->d.pair->cdr;
-        while (arg_list != NULL) {
-            tmp = lll_eval(lll_car(arg_list));
-            lll_append_to_list(&calc_arg_list, tmp);
-            arg_list = arg_list->d.pair->cdr;
-        }
-
-        if ((tp & LLL_BUILTIN_FUNCTION) != 0) {
-            if (calc_arg_list != NULL) {
-                return lll_call_bf(obj->d.pair->car, calc_arg_list);
-            }
-            else {
-                return lll_call_bf(obj->d.pair->car, NULL);
-            }
-        }
-        else if ((tp & LLL_LAMBDA) != 0) {
-            lll_error(11, "Evaluating lambda-forms", __FILE__, __LINE__);
+        else if (car == NULL) {
             return NULL;
         }
         else {
-            lll_error(12, NULL, __FILE__, __LINE__);
-            return NULL;
+            return car;
         }
     }
-    /* if we get an atom */
-    else {
-        switch (obj->type_code) {
-          case LLL_SYMBOL:
-              return obj->d.symbol->pair.car;
-              break;
+    else if (lll_pair_p(obj) != NULL) {
+        struct lll_object *car = lll_car(obj);
+        struct lll_object *cdr = lll_cdr(obj);
 
-          case LLL_QUOTE:
-              return obj->d.obj;
-              break;
+        /* special forms */
+        if (car == lll_get_symbol("and")) {
+            return lll_and(cdr);
+        }
+        else if (car == lll_get_symbol("or")) {
+            return lll_or(cdr);
+        }
+        else if (car == lll_get_symbol("lambda")) {
+            return lll_clambda(lll_car(cdr), lll_cdr(cdr));
+        }
 
-          case LLL_STRING:
-          case LLL_CHAR:
-          case LLL_INTEGER32:
-          case LLL_LAMBDA:
-          case LLL_BUILTIN_FUNCTION:
-              return obj;
-              break;
+        if (lll_pair_p(car) != NULL) {
+            car = lll_eval(car);
+        }
 
-          default:
-              lll_error(6, "eval", __FILE__, __LINE__);
-              return NULL;
+        if (lll_symbol_p(car) != NULL) {
+            struct lll_object *binded = lll_car(car->d.symbol->pair);
+            if (binded == NULL || binded == LLL_UNDEFINED() ||
+                (lll_bf_p(binded) == NULL && lll_lambda_p(binded) == NULL)
+                ) {
+                lll_error(12, NULL, __FILE__, __LINE__);
+            }
+
+            int32_t l = lll_list_length(cdr);
+            if (binded->d.bf->args_count != l) {
+                lll_error(17, "call_bf", __FILE__, __LINE__);
+            }
+            return lll_call_bf(car, calculate_list(cdr));
+        }
+        else {
+            if (car == NULL || car == LLL_UNDEFINED() || lll_lambda_p(car) == NULL) {
+                lll_error(12, NULL, __FILE__, __LINE__);
+            }
+            else {
+                return call_lambda(car, calculate_list(cdr));
+            }
         }
     }
+    return NULL;
 }

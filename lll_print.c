@@ -18,11 +18,11 @@ lll_displayf_sub(FILE * fd, struct lll_object *obj) {
         return;
     }
 
-    if (obj == LLL_VOID) {
+    if (obj == LLL_VOID()) {
         return;
     }
 
-    if (obj == LLL_UNDEFINED) {
+    if (obj == LLL_UNDEFINED()) {
         fprintf(fd, "<undefined value>");
         return;
     }
@@ -34,7 +34,7 @@ lll_displayf_sub(FILE * fd, struct lll_object *obj) {
         lll_displayf_sub(fd, pair->car);
 
         /* if we have not just cons-cell, but list then: */
-        while ((p_cdr != NULL) && (p_cdr != LLL_UNDEFINED) && (p_cdr != LLL_VOID)
+        while ((p_cdr != NULL) && (p_cdr != LLL_UNDEFINED()) && (p_cdr != LLL_VOID())
                && ((p_cdr->type_code & LLL_PAIR) != 0)) {
             struct lll_pair *p_cdr_pair = p_cdr->d.pair;
             fprintf(fd, " ");

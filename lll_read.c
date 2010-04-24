@@ -6,6 +6,7 @@
 #include <ctype.h>
 
 #include "lll_read.h"
+#include "lll_print.h"
 #include "lll_symtable.h"
 #include "lll_utils.h"
 #include "lll_types.h"
@@ -253,6 +254,10 @@ parse_string(char *str) {
         lll_error(14, "get empty string as token", __FILE__, __LINE__);
     }
 
+    if (str[0] == '.' && str[1] == '\0') {
+        return lll_get_symbol("%dot");
+    }
+
     if (correct_integer_p(str)) {
         int i;
         sscanf(str, "%d", &i);
@@ -262,9 +267,14 @@ parse_string(char *str) {
         return lll_cchar(str[2]);
     }
     else if (correct_string_p(str)) {
+        printf("get str: '%s'\n", str);
         int length = strlen(str);
-        str[length - 1] = '\0';
-        return lll_cstring(&str[1]);
+        /* without quotes */
+        char *copy_str = (char *) malloc(length-1);
+        memcpy(copy_str, &str[1], length-2);
+        copy_str[length - 1] = '\0';
+        printf("put str: '%s'\n", copy_str);
+        return lll_cstring(copy_str);
     }
     else if (correct_symbol_p(str)) {
         return lll_get_symbol(str);

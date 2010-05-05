@@ -267,13 +267,11 @@ parse_string(char *str) {
         return lll_cchar(str[2]);
     }
     else if (correct_string_p(str)) {
-        printf("get str: '%s'\n", str);
         int length = strlen(str);
         /* without quotes */
         char *copy_str = (char *) malloc(length-1);
         memcpy(copy_str, &str[1], length-2);
         copy_str[length - 1] = '\0';
-        printf("put str: '%s'\n", copy_str);
         return lll_cstring(copy_str);
     }
     else if (correct_symbol_p(str)) {

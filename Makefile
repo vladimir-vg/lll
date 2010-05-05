@@ -1,8 +1,8 @@
 # Makefile for lll
 
-BINARY=llli
+BINARY=llli.exe
 DEL_CMD=rm
-CC=gcc
+CC=mingw32-gcc
 COMPILE_FLAGS= -Wall -Wextra -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_GLIBCXX_DEBUG -std=c99 -ggdb -O0
 OBJS=	lll_interpreter.o   \
 	lll_types.o         \

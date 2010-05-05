@@ -127,7 +127,16 @@ lll_eval(struct lll_object *obj) {
         else if (car == lll_get_symbol("lambda")) {
             return lll_clambda(lll_car(cdr), lll_cdr(cdr));
         }
-
+        else if (car == lll_get_symbol("define")) {
+            return lll_define(cdr);
+        }
+        else if (car == lll_get_symbol("if")) {
+          return lll_if(cdr);
+        }
+        else if (car == lll_get_symbol("load")) {
+          return lll_load(cdr);
+        }
+        
         if (lll_pair_p(car) != NULL) {
             car = lll_eval(car);
         }
@@ -140,8 +149,13 @@ lll_eval(struct lll_object *obj) {
                 lll_error(12, NULL, __FILE__, __LINE__);
             }
 
+            if (lll_lambda_p(binded)) {
+              return call_lambda(binded, calculate_list(cdr));
+            }
+
             int32_t l = lll_list_length(cdr);
-            if (binded->d.bf->args_count != l) {
+            if ((binded->d.bf->args_count != -1) &&
+                (binded->d.bf->args_count != l)) {
                 lll_error(17, "call_bf", __FILE__, __LINE__);
             }
             return lll_call_bf(car, calculate_list(cdr));
